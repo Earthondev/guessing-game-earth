@@ -1,33 +1,40 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Upload, Trash2, Save, Image as ImageIcon, RefreshCw } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, Save, Image as ImageIcon, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import ImageCropper from "@/components/ImageCropper";
 
 interface ImageData {
   id: string;
   filename: string;
   storage_path: string;
+  original_storage_path?: string;
   answer: string;
   imageUrl: string;
+  originalImageUrl?: string;
   created_at: string;
 }
 
 interface NewImageData {
   id: string;
   imageUrl: string;
+  originalImageUrl: string;
   answer: string;
   file: File;
+  originalFile: File;
+  cropData?: any;
 }
 
 const AdminPage = () => {
   const [existingImages, setExistingImages] = useState<ImageData[]>([]);
   const [newImages, setNewImages] = useState<NewImageData[]>([]);
   const [loading, setLoading] = useState(false);
+  const [cropperImage, setCropperImage] = useState<File | null>(null);
   const { toast } = useToast();
 
   // Load existing images from Supabase
@@ -76,35 +83,57 @@ const AdminPage = () => {
     const files = event.target.files;
     if (!files) return;
 
-    if (newImages.length + files.length > 10) {
+    if (files.length > 1) {
+      // Handle multiple files - show cropper for first file
+      setCropperImage(files[0]);
+      toast({
+        title: "กำลังครอปรูปภาพ",
+        description: "กรุณาเลือกพื้นที่ที่ต้องการสำหรับเกม",
+      });
+    } else if (files.length === 1) {
+      // Single file - show cropper
+      setCropperImage(files[0]);
+    }
+
+    // Reset input
+    event.target.value = '';
+  };
+
+  const handleCropComplete = (originalFile: File, croppedFile: File, cropData: any) => {
+    if (newImages.length >= 10) {
       toast({
         title: "เกินขีดจำกัด",
         description: "สามารถอัปโหลดได้สูงสุด 10 รูปภาพเท่านั้น",
         variant: "destructive",
       });
+      setCropperImage(null);
       return;
     }
 
-    const newImagesList: NewImageData[] = [];
+    const croppedImageUrl = URL.createObjectURL(croppedFile);
+    const originalImageUrl = URL.createObjectURL(originalFile);
     
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const imageUrl = URL.createObjectURL(file);
-      
-      newImagesList.push({
-        id: `new_img_${Date.now()}_${i}`,
-        imageUrl,
-        answer: "",
-        file,
-      });
-    }
+    const newImage: NewImageData = {
+      id: `new_img_${Date.now()}`,
+      imageUrl: croppedImageUrl,
+      originalImageUrl: originalImageUrl,
+      answer: "",
+      file: croppedFile,
+      originalFile: originalFile,
+      cropData: cropData,
+    };
     
-    setNewImages(prev => [...prev, ...newImagesList]);
+    setNewImages(prev => [...prev, newImage]);
+    setCropperImage(null);
     
     toast({
       title: "เพิ่มรูปภาพแล้ว",
-      description: `เพิ่มรูปภาพ ${newImagesList.length} รูป รอการบันทึก`,
+      description: "รูปภาพถูกครอปและเพิ่มเรียบร้อยแล้ว",
     });
+  };
+
+  const handleCropCancel = () => {
+    setCropperImage(null);
   };
 
   const updateNewImageAnswer = (id: string, answer: string) => {
@@ -208,29 +237,41 @@ const AdminPage = () => {
     
     try {
       for (const image of validImages) {
-        // Upload file to storage
-        const fileExt = image.file.name.split('.').pop();
-        const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+        // Upload original file
+        const originalFileExt = image.originalFile.name.split('.').pop();
+        const originalFileName = `original_${Date.now()}_${Math.random().toString(36).substring(2)}.${originalFileExt}`;
         
-        const { error: uploadError } = await supabase.storage
+        const { error: originalUploadError } = await supabase.storage
           .from('masked-rider-images')
-          .upload(fileName, image.file);
+          .upload(originalFileName, image.originalFile);
 
-        if (uploadError) throw uploadError;
+        if (originalUploadError) throw originalUploadError;
 
-        // Save metadata to database
+        // Upload cropped file
+        const croppedFileExt = image.file.name.split('.').pop();
+        const croppedFileName = `cropped_${Date.now()}_${Math.random().toString(36).substring(2)}.${croppedFileExt}`;
+        
+        const { error: croppedUploadError } = await supabase.storage
+          .from('masked-rider-images')
+          .upload(croppedFileName, image.file);
+
+        if (croppedUploadError) throw croppedUploadError;
+
+        // Save metadata to database with both paths
         const { error: dbError } = await supabase
           .from('masked_rider_images')
           .insert({
-            filename: image.file.name,
-            storage_path: fileName,
+            filename: image.originalFile.name,
+            storage_path: croppedFileName,
+            original_storage_path: originalFileName,
             answer: image.answer
           });
 
         if (dbError) throw dbError;
 
-        // Cleanup blob URL
+        // Cleanup blob URLs
         URL.revokeObjectURL(image.imageUrl);
+        URL.revokeObjectURL(image.originalImageUrl);
       }
 
       setNewImages([]);
@@ -238,7 +279,7 @@ const AdminPage = () => {
       
       toast({
         title: "บันทึกสำเร็จ",
-        description: `บันทึกรูปภาพ ${validImages.length} รูป`,
+        description: `บันทึกรูปภาพ ${validImages.length} รูป พร้อมรูปต้นฉบับ`,
       });
     } catch (error) {
       console.error('Error saving images:', error);
@@ -254,20 +295,49 @@ const AdminPage = () => {
 
   const totalImages = existingImages.length + newImages.length;
 
+  if (cropperImage) {
+    return (
+      <div className="min-h-screen p-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-orbitron font-bold text-rider-gold mb-2">
+              ครอปรูปภาพ
+            </h1>
+            <p className="text-muted-foreground">
+              เลือกพื้นที่ที่ต้องการใช้ในเกมเพื่อเพิ่มความยาก
+            </p>
+          </div>
+          
+          <ImageCropper
+            imageFile={cropperImage}
+            onCropComplete={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-4">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
+        {/* Header with enhanced animations */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link to="/">
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             </Link>
-            <h1 className="text-3xl font-orbitron font-bold text-rider-gold">
-              จัดการรูปภาพ
-            </h1>
+            <div className="animate-fade-in">
+              <h1 className="text-3xl font-orbitron font-bold text-rider-gold flex items-center gap-2">
+                <Sparkles className="w-8 h-8" />
+                จัดการรูปภาพ
+              </h1>
+              <p className="text-sm text-muted-foreground mt-1">
+                ระบบครอปขั้นสูงเพื่อเพิ่มความท้าทาย
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <Button
@@ -275,41 +345,50 @@ const AdminPage = () => {
               variant="outline"
               size="sm"
               disabled={loading}
+              className="hover:scale-105 transition-transform"
             >
               <RefreshCw className={`w-4 h-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               รีเฟรช
             </Button>
-            <div className="text-sm text-muted-foreground">
-              รูปภาพทั้งหมด {totalImages} รูป
+            <div className="text-sm text-muted-foreground animate-pulse">
+              รูปภาพทั้งหมด <span className="text-rider-gold font-bold">{totalImages}</span> รูป
             </div>
           </div>
         </div>
 
-        {/* Upload Section */}
-        <Card className="admin-card mb-8">
+        {/* Enhanced Upload Section */}
+        <Card className="admin-card mb-8 border-2 border-rider-gold bg-gradient-to-br from-black to-rider-black-light">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-rider-gold">
               <Upload className="w-5 h-5" />
               อัปโหลดรูปภาพใหม่
+              <span className="ml-auto text-xs bg-rider-gold text-black px-2 py-1 rounded-full">
+                NEW CROPPING SYSTEM
+              </span>
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="image-upload">เลือกรูปภาพมาสค์ไรเดอร์</Label>
+                <Label htmlFor="image-upload" className="text-rider-gold">เลือกรูปภาพมาสค์ไรเดอร์</Label>
                 <Input
                   id="image-upload"
                   type="file"
                   accept="image/*"
-                  multiple
                   onChange={handleImageUpload}
                   disabled={newImages.length >= 10 || loading}
-                  className="mt-2"
+                  className="mt-2 border-rider-metal focus:border-rider-gold"
                 />
               </div>
-              <p className="text-sm text-muted-foreground">
-                รองรับไฟล์ JPG, PNG, GIF (สูงสุด 10 รูป)
-              </p>
+              <div className="bg-rider-black-light p-4 rounded-lg border border-rider-metal">
+                <p className="text-sm text-rider-gold font-semibold mb-2">🎯 ระบบครอปขั้นสูง:</p>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  <li>• รองรับไฟล์ JPG, PNG, GIF (สูงสุด 10 รูป)</li>
+                  <li>• ระบบจะแสดงหน้าต่างครอปให้เลือกพื้นที่</li>
+                  <li>• เก็บทั้งรูปต้นฉบับและรูปที่ครอปแล้ว</li>
+                  <li>• เฉลยจะแสดงรูปต้นฉบับเต็มๆ</li>
+                </ul>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -413,29 +492,33 @@ const AdminPage = () => {
           </Card>
         )}
 
-        {/* Save Button for new images */}
+        {/* Enhanced Save Button */}
         {newImages.length > 0 && (
           <div className="text-center mb-8">
             <Button 
               onClick={saveNewImages} 
-              className="hero-button"
+              className="hero-button hover:scale-105 transition-all duration-300 relative overflow-hidden"
               disabled={loading}
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-rider-gold via-rider-gold-light to-rider-gold opacity-20 animate-shine"></div>
               <Save className="w-4 h-4 mr-2" />
               {loading ? "กำลังบันทึก..." : `บันทึกรูปภาพใหม่ ${newImages.length} รูป`}
             </Button>
           </div>
         )}
 
-        {/* Info Card */}
-        <Card className="admin-card border-rider-gold">
+        {/* Enhanced Info Card */}
+        <Card className="admin-card border-rider-gold bg-gradient-to-br from-rider-black to-rider-black-light">
           <CardContent className="p-6">
-            <h3 className="font-bold text-rider-gold mb-2">📋 ข้อมูลการใช้งาน</h3>
+            <h3 className="font-bold text-rider-gold mb-2 flex items-center gap-2">
+              <Sparkles className="w-5 h-5" />
+              📋 ระบบครอปขั้นสูง - คุณสมบัติใหม่
+            </h3>
             <div className="space-y-2 text-sm text-muted-foreground">
-              <p>• รูปภาพจะถูกเก็บใน Supabase Storage อย่างถาวร</p>
-              <p>• สามารถแก้ไขคำเฉลยได้โดยพิมพ์ในช่องและกด Enter</p>
-              <p>• รูปภาพใหม่จะแสดงด้วยกรอบสีแดง รอการบันทึก</p>
-              <p>• รูปภาพที่บันทึกแล้วจะแสดงด้วยกรอบสีปกติ</p>
+              <p>• <span className="text-rider-gold">ครอปอัตโนมัติ:</span> เลือกพื้นที่ที่ต้องการก่อนบันทึก</p>
+              <p>• <span className="text-rider-gold">เก็บรูปต้นฉบับ:</span> ระบบเก็บทั้งรูปครอปและรูปเต็ม</p>
+              <p>• <span className="text-rider-gold">เฉลยแบบเต็ม:</span> แสดงรูปต้นฉบับเมื่อเฉลย</p>
+              <p>• <span className="text-rider-gold">เพิ่มความยาก:</span> ครอปเฉพาะส่วนสำคัญ</p>
             </div>
           </CardContent>
         </Card>
