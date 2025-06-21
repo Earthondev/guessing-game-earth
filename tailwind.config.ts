@@ -57,15 +57,20 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
-				// Masked Rider theme colors
+				// Enhanced Masked Rider theme colors
 				rider: {
 					red: '#DC2626',
 					'red-dark': '#B91C1C',
+					'red-darker': '#991B1B',
 					black: '#1F2937',
 					'black-light': '#374151',
+					'black-dark': '#111827',
 					metal: '#6B7280',
 					'metal-light': '#9CA3AF',
+					'metal-dark': '#4B5563',
 					gold: '#F59E0B',
+					'gold-light': '#FBBF24',
+					'gold-dark': '#D97706',
 				}
 			},
 			borderRadius: {
@@ -80,11 +85,26 @@ export default {
 				},
 				'tile-reveal': {
 					'0%': { transform: 'scale(0.8)', opacity: '0' },
+					'50%': { transform: 'scale(1.1)', opacity: '0.7' },
 					'100%': { transform: 'scale(1)', opacity: '1' }
 				},
 				'glow-pulse': {
-					'0%, 100%': { boxShadow: '0 0 5px #DC2626' },
-					'50%': { boxShadow: '0 0 20px #DC2626, 0 0 30px #DC2626' }
+					'0%, 100%': { 
+						boxShadow: '0 0 5px #DC2626, 0 0 10px #DC2626',
+						transform: 'scale(1)'
+					},
+					'50%': { 
+						boxShadow: '0 0 20px #DC2626, 0 0 30px #DC2626, 0 0 40px #DC2626',
+						transform: 'scale(1.02)'
+					}
+				},
+				'shine': {
+					'0%': { transform: 'translateX(-100%) skewX(-15deg)' },
+					'100%': { transform: 'translateX(200%) skewX(-15deg)' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0px)' },
+					'50%': { transform: 'translateY(-10px)' }
 				},
 				'accordion-down': {
 					from: {
@@ -105,10 +125,15 @@ export default {
 			},
 			animation: {
 				'tile-flip': 'tile-flip 0.3s ease-in-out',
-				'tile-reveal': 'tile-reveal 0.3s ease-in-out',
+				'tile-reveal': 'tile-reveal 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
 				'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+				'shine': 'shine 2s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite',
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			backdropBlur: {
+				xs: '2px',
 			}
 		}
 	},
