@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import TileGrid from "@/components/TileGrid";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ImageData {
   id: string;
@@ -18,18 +19,52 @@ const GamePage = () => {
   const [revealedTiles, setRevealedTiles] = useState<boolean[]>(Array(25).fill(false));
   const [allRevealed, setAllRevealed] = useState(false);
   const [images, setImages] = useState<ImageData[]>([]);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  // Load images from localStorage
-  useEffect(() => {
-    const savedImages = localStorage.getItem('maskedRiderImages');
-    if (savedImages) {
-      const parsedImages = JSON.parse(savedImages);
-      setImages(parsedImages);
-      if (parsedImages.length > 0) {
-        selectRandomImage(parsedImages);
+  // Load images from Supabase
+  const loadImages = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('masked_rider_images')
+        .select('*');
+
+      if (error) throw error;
+
+      // Get public URLs for each image
+      const imagesWithUrls = await Promise.all(
+        data.map(async (img) => {
+          const { data: urlData } = supabase.storage
+            .from('masked-rider-images')
+            .getPublicUrl(img.storage_path);
+          
+          return {
+            id: img.id,
+            imageUrl: urlData.publicUrl,
+            answer: img.answer
+          };
+        })
+      );
+
+      setImages(imagesWithUrls);
+      if (imagesWithUrls.length > 0 && !currentImage) {
+        selectRandomImage(imagesWithUrls);
       }
+    } catch (error) {
+      console.error('Error loading images:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถโหลดรูปภาพได้",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadImages();
   }, []);
 
   const selectRandomImage = (imageList: ImageData[]) => {
@@ -110,6 +145,19 @@ const GamePage = () => {
   };
 
   const revealedCount = revealedTiles.filter(Boolean).length;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen p-4 flex items-center justify-center">
+        <Card className="admin-card">
+          <CardContent className="p-12 text-center">
+            <div className="w-8 h-8 border-4 border-rider-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-muted-foreground">กำลังโหลดรูปภาพ...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen p-4">
