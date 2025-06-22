@@ -67,7 +67,7 @@ const GamePage = () => {
       console.error('Error loading images:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโ"ลดรูปภาพได้",
+        description: "ไม่สามารถโหลดรูปภาพได้",
         variant: "destructive",
       });
     } finally {
@@ -264,7 +264,19 @@ const GamePage = () => {
             )}
           </div>
         ) : (
-          // ... keep existing code (no images state)
+          <Card className="admin-card">
+            <CardContent className="p-12 text-center">
+              <h3 className="text-xl font-bold text-muted-foreground mb-4">ไม่มีรูปภาพในระบบ</h3>
+              <p className="text-muted-foreground mb-6">
+                กรุณาเพิ่มรูปภาพในหน้าจัดการก่อนเริ่มเล่นเกม
+              </p>
+              <Link to="/admin">
+                <Button className="hero-button">
+                  ไปหน้าจัดการรูปภาพ
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
         )}
 
         {/* Enhanced Control Buttons */}
