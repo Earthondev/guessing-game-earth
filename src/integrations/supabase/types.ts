@@ -9,10 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      game_categories: {
+        Row: {
+          cover_image_path: string | null
+          created_at: string
+          description: string | null
+          display_name: string
+          icon: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          cover_image_path?: string | null
+          created_at?: string
+          description?: string | null
+          display_name: string
+          icon?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          cover_image_path?: string | null
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       masked_rider_images: {
         Row: {
           answer: string
           category: string
+          category_id: string | null
           created_at: string
           filename: string
           id: string
@@ -23,6 +57,7 @@ export type Database = {
         Insert: {
           answer: string
           category?: string
+          category_id?: string | null
           created_at?: string
           filename: string
           id?: string
@@ -33,6 +68,7 @@ export type Database = {
         Update: {
           answer?: string
           category?: string
+          category_id?: string | null
           created_at?: string
           filename?: string
           id?: string
@@ -40,7 +76,15 @@ export type Database = {
           storage_path?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "masked_rider_images_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "game_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
