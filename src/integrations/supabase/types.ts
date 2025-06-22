@@ -12,25 +12,31 @@ export type Database = {
       masked_rider_images: {
         Row: {
           answer: string
+          category: string
           created_at: string
           filename: string
           id: string
+          original_storage_path: string | null
           storage_path: string
           updated_at: string
         }
         Insert: {
           answer: string
+          category?: string
           created_at?: string
           filename: string
           id?: string
+          original_storage_path?: string | null
           storage_path: string
           updated_at?: string
         }
         Update: {
           answer?: string
+          category?: string
           created_at?: string
           filename?: string
           id?: string
+          original_storage_path?: string | null
           storage_path?: string
           updated_at?: string
         }

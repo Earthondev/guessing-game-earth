@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, RotateCcw, Eye, Shuffle, Volume2 } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ArrowLeft, RotateCcw, Eye, Shuffle, Volume2, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import TileGrid from "@/components/TileGrid";
+import GameTimer from "@/components/GameTimer";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImageData {
@@ -15,21 +17,39 @@ interface ImageData {
 }
 
 const GamePage = () => {
+  const [searchParams] = useSearchParams();
+  const category = searchParams.get('category') || 'masked_rider';
+  
   const [currentImage, setCurrentImage] = useState<ImageData | null>(null);
   const [revealedTiles, setRevealedTiles] = useState<boolean[]>(Array(25).fill(false));
   const [allRevealed, setAllRevealed] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
   const [images, setImages] = useState<ImageData[]>([]);
+  const [currentRoundImages, setCurrentRoundImages] = useState<ImageData[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [timerActive, setTimerActive] = useState(false);
+  const [score, setScore] = useState(0);
+  const [questionsAnswered, setQuestionsAnswered] = useState(0);
   const { toast } = useToast();
 
-  // Enhanced loadImages function to get both cropped and original images
+  const getCategoryDisplayName = (cat: string) => {
+    const categories: { [key: string]: string } = {
+      'masked_rider': 'มาสค์ไรเดอร์',
+      'thai_celebrities': 'ดาราไทย',
+      'thai_movies': 'หนังไทย'
+    };
+    return categories[cat] || 'ไม่ทราบหมวดหมู่';
+  };
+
+  // Enhanced loadImages function to get images by category
   const loadImages = async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('masked_rider_images')
-        .select('*');
+        .select('*')
+        .eq('category', category);
 
       if (error) throw error;
 
@@ -59,10 +79,18 @@ const GamePage = () => {
         })
       );
 
-      setImages(imagesWithUrls);
-      if (imagesWithUrls.length > 0 && !currentImage) {
-        selectRandomImage(imagesWithUrls);
+      if (imagesWithUrls.length === 0) {
+        toast({
+          title: "ไม่มีรูปภาพ",
+          description: `ไม่พบรูปภาพในหมวดหมู่ ${getCategoryDisplayName(category)}`,
+          variant: "destructive",
+        });
+        setImages([]);
+        return;
       }
+
+      setImages(imagesWithUrls);
+      startNewRound(imagesWithUrls);
     } catch (error) {
       console.error('Error loading images:', error);
       toast({
@@ -75,23 +103,30 @@ const GamePage = () => {
     }
   };
 
-  useEffect(() => {
-    loadImages();
-  }, []);
-
-  const selectRandomImage = (imageList: ImageData[]) => {
+  const startNewRound = (imageList: ImageData[]) => {
     if (imageList.length === 0) return;
     
-    const randomIndex = Math.floor(Math.random() * imageList.length);
-    setCurrentImage(imageList[randomIndex]);
+    // Select up to 10 random unique images for this round
+    const shuffled = [...imageList].sort(() => Math.random() - 0.5);
+    const roundImages = shuffled.slice(0, Math.min(10, imageList.length));
+    
+    setCurrentRoundImages(roundImages);
+    setCurrentImageIndex(0);
+    setCurrentImage(roundImages[0]);
     setRevealedTiles(Array(25).fill(false));
     setAllRevealed(false);
+    setShowOriginal(false);
+    setTimerActive(true);
+    setQuestionsAnswered(0);
   };
+
+  useEffect(() => {
+    loadImages();
+  }, [category]);
 
   const handleTileClick = (index: number) => {
     if (revealedTiles[index] || allRevealed) return;
 
-    // Play sound effect
     playClickSound();
 
     const newRevealed = [...revealedTiles];
@@ -100,65 +135,101 @@ const GamePage = () => {
   };
 
   const playClickSound = () => {
-    // Create a simple beep sound
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 800;
-    oscillator.type = 'square';
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+    try {
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.value = 800;
+      oscillator.type = 'square';
+      
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+      
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (error) {
+      console.error('Audio error:', error);
+    }
   };
 
   const revealAll = () => {
     setRevealedTiles(Array(25).fill(true));
     setAllRevealed(true);
     setShowOriginal(true);
+    setTimerActive(false);
     
-    // Enhanced reveal effect with animation
+    // Calculate score based on revealed tiles
+    const revealedCount = revealedTiles.filter(Boolean).length;
+    const points = Math.max(0, 25 - revealedCount);
+    setScore(prev => prev + points);
+    
     setTimeout(() => {
       toast({
         title: "🎉 เฉลย!",
-        description: `${currentImage?.answer || "ไม่พบคำเฉลย"} - แสดงรูปต้นฉบับแล้ว`,
+        description: `${currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ ${points} คะแนน`,
       });
     }, 500);
+  };
+
+  const nextQuestion = () => {
+    if (currentRoundImages.length === 0) {
+      startNewRound(images);
+      return;
+    }
+
+    const nextIndex = currentImageIndex + 1;
+    
+    if (nextIndex >= currentRoundImages.length) {
+      // End of round
+      toast({
+        title: "🏁 จบรอบ!",
+        description: `คะแนนรวม: ${score} คะแนน จาก ${questionsAnswered + 1} คำถาม`,
+      });
+      
+      setTimeout(() => {
+        startNewRound(images);
+      }, 2000);
+      return;
+    }
+
+    setCurrentImageIndex(nextIndex);
+    setCurrentImage(currentRoundImages[nextIndex]);
+    setRevealedTiles(Array(25).fill(false));
+    setAllRevealed(false);
+    setShowOriginal(false);
+    setTimerActive(true);
+    setQuestionsAnswered(prev => prev + 1);
+    
+    toast({
+      title: "🔄 คำถามถัดไป",
+      description: `คำถามที่ ${nextIndex + 1}/${currentRoundImages.length}`,
+    });
+  };
+
+  const handleTimeUp = () => {
+    if (!allRevealed) {
+      revealAll();
+      toast({
+        title: "⏰ หมดเวลา!",
+        description: "เวลาหมดแล้ว เฉลยอัตโนมัติ",
+        variant: "destructive",
+      });
+    }
   };
 
   const resetCurrent = () => {
     setRevealedTiles(Array(25).fill(false));
     setAllRevealed(false);
     setShowOriginal(false);
+    setTimerActive(true);
     
     toast({
       title: "รีเซ็ตแล้ว",
-      description: "เริ่มเกมใหม่อีกครั้ง",
-    });
-  };
-
-  const nextQuestion = () => {
-    if (images.length === 0) {
-      toast({
-        title: "ไม่มีรูปภาพ",
-        description: "กรุณาเพิ่มรูปภาพในหน้าจัดการก่อน",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setShowOriginal(false);
-    selectRandomImage(images);
-    
-    toast({
-      title: "🔄 คำถามใหม่",
-      description: "เริ่มเกมใหม่!",
+      description: "เริ่มคำถามนี้ใหม่อีกครั้ง",
     });
   };
 
@@ -185,20 +256,28 @@ const GamePage = () => {
           <div className="flex items-center gap-4">
             <Link to="/">
               <Button variant="outline" size="icon" className="hover:scale-105 transition-transform">
-                <ArrowLeft className="w-4 h-4" />
+                <Home className="w-4 h-4" />
               </Button>
             </Link>
             <div className="animate-fade-in">
               <h1 className="text-3xl font-orbitron font-bold text-rider-gold">
-                เกมทายภาพ
+                {getCategoryDisplayName(category)}
               </h1>
               <p className="text-sm text-muted-foreground">
-                ระบบครอปขั้นสูง - ความยากเพิ่มขึ้น
+                คำถามที่ {currentImageIndex + 1}/{currentRoundImages.length} | คะแนน: {score}
               </p>
             </div>
           </div>
-          <div className="text-sm text-muted-foreground animate-pulse">
-            เปิดแล้ว <span className="text-rider-gold font-bold">{revealedCount}</span>/25 ช่อง
+          
+          <div className="flex items-center gap-4">
+            <GameTimer
+              isActive={timerActive}
+              onTimeUp={handleTimeUp}
+              duration={60}
+            />
+            <div className="text-sm text-muted-foreground animate-pulse">
+              เปิดแล้ว <span className="text-rider-gold font-bold">{revealedCount}</span>/25 ช่อง
+            </div>
           </div>
         </div>
 
@@ -216,7 +295,7 @@ const GamePage = () => {
                     </div>
                   ) : (
                     <div className="animate-fade-in">
-                      ทายชื่อมาสค์ไรเดอร์จากภาพ
+                      ทายจากภาพนี้
                     </div>
                   )}
                 </div>
@@ -244,8 +323,9 @@ const GamePage = () => {
                       className="w-full max-h-96 object-contain mx-auto animate-fade-in"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-30"></div>
+                    {/* Answer moved to bottom */}
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-rider-gold text-black px-4 py-2 rounded-full font-bold animate-float">
+                      <div className="bg-rider-gold text-black px-6 py-3 rounded-full font-bold text-lg animate-float">
                         {currentImage.answer}
                       </div>
                     </div>
@@ -266,13 +346,15 @@ const GamePage = () => {
         ) : (
           <Card className="admin-card">
             <CardContent className="p-12 text-center">
-              <h3 className="text-xl font-bold text-muted-foreground mb-4">ไม่มีรูปภาพในระบบ</h3>
+              <h3 className="text-xl font-bold text-muted-foreground mb-4">
+                ไม่มีรูปภาพในหมวดหมู่นี้
+              </h3>
               <p className="text-muted-foreground mb-6">
-                กรุณาเพิ่มรูปภาพในหน้าจัดการก่อนเริ่มเล่นเกม
+                กรุณาเพิ่มรูปภาพในหมวดหมู่ {getCategoryDisplayName(category)} ก่อนเริ่มเล่นเกม
               </p>
-              <Link to="/admin">
-                <Button className="hero-button">
-                  ไปหน้าจัดการรูปภาพ
+              <Link to="/">
+                <Button className="hero-button mr-4">
+                  กลับหน้าหลัก
                 </Button>
               </Link>
             </CardContent>
@@ -338,8 +420,8 @@ const GamePage = () => {
                   <div className="text-sm text-muted-foreground">ความคืบหน้า</div>
                 </div>
                 <div className="transform hover:scale-105 transition-transform">
-                  <div className="text-2xl font-bold text-white">{images.length}</div>
-                  <div className="text-sm text-muted-foreground">รูปภาพทั้งหมด</div>
+                  <div className="text-2xl font-bold text-white">{score}</div>
+                  <div className="text-sm text-muted-foreground">คะแนนรวม</div>
                 </div>
               </div>
             </CardContent>
