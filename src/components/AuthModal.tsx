@@ -1,11 +1,11 @@
 
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { X, Shield } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -13,10 +13,9 @@ interface AuthModalProps {
   onAuthSuccess: () => void;
 }
 
-const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onAuthSuccess }) => {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
@@ -25,24 +24,21 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
+      // Simple hardcoded authentication
+      if (username === 'Nattapart' && password === '220842') {
+        localStorage.setItem('admin_authenticated', 'true');
+        toast({
+          title: "เข้าสู่ระบบสำเร็จ",
+          description: "ยินดีต้อนรับสู่ระบบจัดการ",
+        });
+        onAuthSuccess();
+      } else {
+        throw new Error('Invalid credentials');
+      }
+    } catch (error) {
       toast({
-        title: "เข้าสู่ระบบสำเร็จ",
-        description: "ยินดีต้นรับสู่ระบบจัดการ",
-      });
-
-      onAuthSuccess();
-      onClose();
-    } catch (error: any) {
-      toast({
-        title: "เกิดข้อผิดพลาด",
-        description: error.message || "ไม่สามารถเข้าสู่ระบบได้",
+        title: "เข้าสู่ระบบไม่สำเร็จ",
+        description: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
         variant: "destructive",
       });
     } finally {
@@ -53,67 +49,55 @@ const AuthModal = ({ isOpen, onClose, onAuthSuccess }: AuthModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <Card className="admin-card w-full max-w-md mx-4">
-        <CardHeader>
-          <CardTitle className="text-center font-orbitron text-rider-gold">
-            🔐 เข้าสู่ระบบผู้ดูแล
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-md bg-gradient-to-br from-slate-900 to-slate-800 border-green-400">
+        <CardHeader className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="absolute top-2 right-2 text-green-400 hover:bg-green-400/20"
+          >
+            <X className="w-4 h-4" />
+          </Button>
+          <CardTitle className="flex items-center gap-2 text-green-400 text-center">
+            <Shield className="w-5 h-5" />
+            เข้าสู่ระบบผู้ดูแล
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rider-metal w-4 h-4" />
-                <Input
-                  type="email"
-                  placeholder="อีเมล"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
-                  required
-                />
-              </div>
+              <Label htmlFor="username" className="text-slate-200">ชื่อผู้ใช้</Label>
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="bg-slate-800 border-slate-600 text-white"
+                placeholder="กรอกชื่อผู้ใช้"
+              />
             </div>
-            
             <div className="space-y-2">
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-rider-metal w-4 h-4" />
-                <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="รหัสผ่าน"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-rider-metal hover:text-rider-gold transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
+              <Label htmlFor="password" className="text-slate-200">รหัสผ่าน</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="bg-slate-800 border-slate-600 text-white"
+                placeholder="กรอกรหัสผ่าน"
+              />
             </div>
-
-            <div className="flex gap-2">
-              <Button
-                type="submit"
-                disabled={loading}
-                className="hero-button flex-1"
-              >
-                {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onClose}
-                className="flex-1"
-              >
-                ยกเลิก
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-green-500 hover:bg-green-600 text-white"
+            >
+              {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+            </Button>
           </form>
         </CardContent>
       </Card>
