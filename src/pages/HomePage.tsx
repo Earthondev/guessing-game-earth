@@ -50,14 +50,14 @@ const HomePage = () => {
     try {
       const { data, error } = await supabase
         .from('masked_rider_images')
-        .select('category')
-        .group('category');
+        .select('category');
 
       if (error) throw error;
 
-      const availableCategoryIds = data?.map(item => item.category) || ['masked_rider'];
+      // Get unique categories from the data
+      const uniqueCategories = [...new Set(data?.map(item => item.category) || ['masked_rider'])];
       const filtered = defaultCategories.filter(cat => 
-        availableCategoryIds.includes(cat.name)
+        uniqueCategories.includes(cat.name)
       );
       
       setAvailableCategories(filtered.length > 0 ? filtered : [defaultCategories[0]]);

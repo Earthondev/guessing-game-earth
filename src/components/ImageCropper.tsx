@@ -6,8 +6,8 @@ import { Crop, RotateCcw, Check, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ImageCropperProps {
-  imageFile: File;
-  onCropComplete: (originalFile: File, croppedFile: File, cropData: CropData) => void;
+  imageUrl: string;
+  onCropComplete: (croppedImageData: string) => void;
   onCancel: () => void;
 }
 
@@ -20,8 +20,7 @@ interface CropData {
   naturalHeight: number;
 }
 
-const ImageCropper: React.FC<ImageCropperProps> = ({ imageFile, onCropComplete, onCancel }) => {
-  const [imageUrl, setImageUrl] = useState<string>('');
+const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, onCancel }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [cropBox, setCropBox] = useState({ x: 50, y: 50, size: 200 });
@@ -30,12 +29,6 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageFile, onCropComplete, 
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-
-  React.useEffect(() => {
-    const url = URL.createObjectURL(imageFile);
-    setImageUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [imageFile]);
 
   const handleImageLoad = () => {
     if (imageRef.current && containerRef.current) {
@@ -168,12 +161,9 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageFile, onCropComplete, 
           0, 0, cropData.width, cropData.height
         );
         
-        canvas.toBlob((blob) => {
-          if (blob) {
-            const croppedFile = new File([blob], `cropped_${imageFile.name}`, { type: imageFile.type });
-            onCropComplete(imageFile, croppedFile, cropData);
-          }
-        }, imageFile.type, 0.9);
+        // Convert canvas to data URL and pass to callback
+        const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
+        onCropComplete(croppedImageData);
       };
       
       imgElement.src = imageUrl;
@@ -261,7 +251,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageFile, onCropComplete, 
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li>ลากกรอบสี่เหลี่ยมเพื่อเลือกตำแหน่งที่ต้องการ</li>
             <li>ลากมุมกรอบเพื่อปรับขนาด</li>
-            <li>เลือกส่วนที่สำคัญของมาสค์ไรเดอร์เพื่อเพิ่มความยาก</li>
+            <li>เลือกส่วนที่สำคัญของรูปภาพเพื่อเพิ่มความยาก</li>
           </ul>
         </div>
 
