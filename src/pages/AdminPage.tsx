@@ -1,15 +1,16 @@
-
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { ArrowLeft, Upload, Trash2, Plus, Save, Eye, Image as ImageIcon } from "lucide-react";
+import { ArrowLeft, Upload, Trash2, Plus, Save, Eye, Image as ImageIcon, Folder } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ImageCropper from "@/components/ImageCropper";
+import CategoryManager from "@/components/CategoryManager";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImageItem {
@@ -49,11 +50,11 @@ const AdminPage = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen p-4 flex items-center justify-center">
-        <Card className="admin-card">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 flex items-center justify-center">
+        <Card className="bg-slate-800/50 border-green-400/30">
           <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-rider-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-muted-foreground">กำลังตรวจสอบสิทธิ์...</p>
+            <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-slate-300">กำลังตรวจสอบสิทธิ์...</p>
           </CardContent>
         </Card>
       </div>
@@ -128,8 +129,9 @@ const AdminPage = () => {
     }
   };
 
-  const handleCropComplete = (croppedImageData: string) => {
-    setCroppedImage(croppedImageData);
+  const handleCropComplete = (originalFile: File, croppedFile: File) => {
+    const croppedUrl = URL.createObjectURL(croppedFile);
+    setCroppedImage(croppedUrl);
     setShowCropper(false);
   };
 
@@ -247,171 +249,192 @@ const AdminPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link to="/">
-              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform">
+              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-green-400 text-green-400 hover:bg-green-400 hover:text-white">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-orbitron font-bold text-rider-gold">
-                ระบบจัดการรูปภาพ
+              <h1 className="text-3xl font-orbitron font-bold text-green-400">
+                ระบบจัดการเกม
               </h1>
-              <p className="text-sm text-muted-foreground">
-                จัดการรูปภาพและคำเฉลยสำหรับทุกหมวดหมู่
+              <p className="text-sm text-slate-300">
+                จัดการหมวดหมู่และรูปภาพสำหรับเกม
               </p>
             </div>
           </div>
         </div>
 
-        {/* Upload Form */}
-        <Card className="admin-card mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-rider-gold">
-              <Plus className="w-5 h-5" />
-              เพิ่มรูปภาพใหม่
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <Label>หมวดหมู่</Label>
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.value} value={cat.value}>
-                          {cat.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+        {/* Tabs for different management sections */}
+        <Tabs defaultValue="categories" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-800 border-green-400/30">
+            <TabsTrigger value="categories" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+              <Folder className="w-4 h-4 mr-2" />
+              จัดการหมวดหมู่
+            </TabsTrigger>
+            <TabsTrigger value="images" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+              <ImageIcon className="w-4 h-4 mr-2" />
+              จัดการรูปภาพ
+            </TabsTrigger>
+          </TabsList>
 
-                <div>
-                  <Label>เลือกรูปภาพ</Label>
-                  <Input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleFileSelect}
-                    className="cursor-pointer"
-                  />
-                </div>
+          <TabsContent value="categories" className="mt-6">
+            <CategoryManager />
+          </TabsContent>
 
-                <div>
-                  <Label>คำเฉลย</Label>
-                  <Input
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                    placeholder="ใส่คำเฉลย..."
-                  />
-                </div>
-
-                <Button
-                  onClick={uploadImage}
-                  disabled={loading || !selectedFile || !croppedImage || !answer.trim()}
-                  className="hero-button w-full"
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  {loading ? "กำลังบันทึก..." : "บันทึกรูปภาพ"}
-                </Button>
-              </div>
-
-              <div className="space-y-4">
-                {croppedImage && (
-                  <div>
-                    <Label>ตัวอย่างรูปที่ครอป</Label>
-                    <div className="border rounded-lg p-4 bg-muted">
-                      <img
-                        src={croppedImage}
-                        alt="Cropped preview"
-                        className="w-full max-w-xs mx-auto rounded-lg"
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Images by Category */}
-        {categories.map((category) => {
-          const categoryImages = getCategoryImages(category.value);
-          return (
-            <Card key={category.value} className="admin-card mb-8">
+          <TabsContent value="images" className="mt-6">
+            {/* Upload Form */}
+            <Card className="bg-slate-800/50 border-green-400/30 mb-8">
               <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <ImageIcon className="w-5 h-5 text-rider-gold" />
-                    {category.label}
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {categoryImages.length} รูปภาพ
-                  </span>
+                <CardTitle className="flex items-center gap-2 text-green-400">
+                  <Plus className="w-5 h-5" />
+                  เพิ่มรูปภาพใหม่
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {categoryImages.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
-                    ยังไม่มีรูปภาพในหมวดหมู่นี้
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-slate-200">หมวดหมู่</Label>
+                      <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.value} value={cat.value}>
+                              {cat.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-slate-200">เลือกรูปภาพ</Label>
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="cursor-pointer bg-slate-800 border-slate-600 text-white"
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-slate-200">คำเฉลย</Label>
+                      <Input
+                        value={answer}
+                        onChange={(e) => setAnswer(e.target.value)}
+                        placeholder="ใส่คำเฉลย..."
+                        className="bg-slate-800 border-slate-600 text-white"
+                      />
+                    </div>
+
+                    <Button
+                      onClick={uploadImage}
+                      disabled={loading || !selectedFile || !croppedImage || !answer.trim()}
+                      className="bg-green-500 hover:bg-green-600 text-white w-full"
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      {loading ? "กำลังบันทึก..." : "บันทึกรูปภาพ"}
+                    </Button>
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {categoryImages.map((image) => (
-                      <Card key={image.id} className="border-2 border-muted hover:border-rider-gold transition-colors">
-                        <CardContent className="p-4">
-                          <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-muted">
-                            <img
-                              src={image.imageUrl}
-                              alt={image.answer}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <p className="font-bold text-rider-gold">{image.answer}</p>
-                            <p className="text-xs text-muted-foreground">
-                              ไฟล์: {image.filename}
-                            </p>
-                            <div className="flex gap-2">
-                              {image.originalImageUrl && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => window.open(image.originalImageUrl, '_blank')}
-                                  className="flex-1"
-                                >
-                                  <Eye className="w-3 h-3 mr-1" />
-                                  รูปต้นฉบับ
-                                </Button>
-                              )}
-                              <Button
-                                size="sm"
-                                variant="destructive"
-                                onClick={() => deleteImage(image)}
-                                className="flex-1"
-                              >
-                                <Trash2 className="w-3 h-3 mr-1" />
-                                ลบ
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+
+                  <div className="space-y-4">
+                    {croppedImage && (
+                      <div>
+                        <Label className="text-slate-200">ตัวอย่างรูปที่ครอป</Label>
+                        <div className="border rounded-lg p-4 bg-slate-700">
+                          <img
+                            src={croppedImage}
+                            alt="Cropped preview"
+                            className="w-full max-w-xs mx-auto rounded-lg"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
+                </div>
               </CardContent>
             </Card>
-          );
-        })}
+
+            {/* Images by Category */}
+            {categories.map((category) => {
+              const categoryImages = getCategoryImages(category.value);
+              return (
+                <Card key={category.value} className="bg-slate-800/50 border-green-400/30 mb-8">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <ImageIcon className="w-5 h-5 text-green-400" />
+                        <span className="text-green-400">{category.label}</span>
+                      </div>
+                      <span className="text-sm text-slate-300">
+                        {categoryImages.length} รูปภาพ
+                      </span>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {categoryImages.length === 0 ? (
+                      <div className="text-center py-8 text-slate-400">
+                        ยังไม่มีรูปภาพในหมวดหมู่นี้
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {categoryImages.map((image) => (
+                          <Card key={image.id} className="bg-slate-700 border-slate-600 hover:border-green-400 transition-colors">
+                            <CardContent className="p-4">
+                              <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-slate-600">
+                                <img
+                                  src={image.imageUrl}
+                                  alt={image.answer}
+                                  className="w-full h-full object-cover"
+                                />
+                              </div>
+                              <div className="space-y-2">
+                                <p className="font-bold text-green-400">{image.answer}</p>
+                                <p className="text-xs text-slate-400">
+                                  ไฟล์: {image.filename}
+                                </p>
+                                <div className="flex gap-2">
+                                  {image.originalImageUrl && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => window.open(image.originalImageUrl, '_blank')}
+                                      className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-600"
+                                    >
+                                      <Eye className="w-3 h-3 mr-1" />
+                                      รูปต้นฉบับ
+                                    </Button>
+                                  )}
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => deleteImage(image)}
+                                    className="flex-1"
+                                  >
+                                    <Trash2 className="w-3 h-3 mr-1" />
+                                    ลบ
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </TabsContent>
+        </Tabs>
 
         {/* Image Cropper Modal */}
         {showCropper && previewUrl && (
