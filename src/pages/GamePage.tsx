@@ -1,12 +1,11 @@
 
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { ArrowLeft, RotateCcw, Eye, Shuffle, Volume2, Home } from "lucide-react";
+import { ArrowLeft, RotateCcw, Eye, Shuffle, Home, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import TileGrid from "@/components/TileGrid";
-import GameTimer from "@/components/GameTimer";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImageData {
@@ -24,25 +23,35 @@ const GamePage = () => {
   const [revealedTiles, setRevealedTiles] = useState<boolean[]>(Array(25).fill(false));
   const [allRevealed, setAllRevealed] = useState(false);
   const [showOriginal, setShowOriginal] = useState(false);
-  const [images, setImages] = useState<ImageData[]>([]);
   const [currentRoundImages, setCurrentRoundImages] = useState<ImageData[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [timerActive, setTimerActive] = useState(false);
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState(25);
+  const [totalScore, setTotalScore] = useState(0);
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
+  const [gameCompleted, setGameCompleted] = useState(false);
   const { toast } = useToast();
 
-  const getCategoryDisplayName = (cat: string) => {
-    const categories: { [key: string]: string } = {
-      'masked_rider': 'มาสค์ไรเดอร์',
-      'thai_celebrities': 'ดาราไทย',
-      'thai_movies': 'หนังไทย'
-    };
-    return categories[cat] || 'ไม่ทราบหมวดหมู่';
+  const getCategoryDisplayName = async (cat: string) => {
+    try {
+      const { data } = await supabase
+        .from('game_categories')
+        .select('display_name')
+        .eq('name', cat)
+        .single();
+      
+      return data?.display_name || 'ไม่ทราบหมวดหมู่';
+    } catch {
+      return 'ไม่ทราบหมวดหมู่';
+    }
   };
 
-  // Enhanced loadImages function to get images by category
+  const [categoryDisplayName, setCategoryDisplayName] = useState('');
+
+  useEffect(() => {
+    getCategoryDisplayName(category).then(setCategoryDisplayName);
+  }, [category]);
+
   const loadImages = async () => {
     setLoading(true);
     try {
@@ -52,6 +61,15 @@ const GamePage = () => {
         .eq('category', category);
 
       if (error) throw error;
+
+      if (!data || data.length === 0) {
+        toast({
+          title: "ไม่มีรูปภาพ",
+          description: `ไม่พบรูปภาพในหมวดหมู่ ${categoryDisplayName}`,
+          variant: "destructive",
+        });
+        return;
+      }
 
       // Get public URLs for each image (both cropped and original)
       const imagesWithUrls = await Promise.all(
@@ -79,18 +97,7 @@ const GamePage = () => {
         })
       );
 
-      if (imagesWithUrls.length === 0) {
-        toast({
-          title: "ไม่มีรูปภาพ",
-          description: `ไม่พบรูปภาพในหมวดหมู่ ${getCategoryDisplayName(category)}`,
-          variant: "destructive",
-        });
-        setImages([]);
-        return;
-      }
-
-      setImages(imagesWithUrls);
-      startNewRound(imagesWithUrls);
+      startNewGame(imagesWithUrls);
     } catch (error) {
       console.error('Error loading images:', error);
       toast({
@@ -103,21 +110,23 @@ const GamePage = () => {
     }
   };
 
-  const startNewRound = (imageList: ImageData[]) => {
+  const startNewGame = (imageList: ImageData[]) => {
     if (imageList.length === 0) return;
     
-    // Select up to 10 random unique images for this round
+    // Select exactly 5 random unique images for this game
     const shuffled = [...imageList].sort(() => Math.random() - 0.5);
-    const roundImages = shuffled.slice(0, Math.min(10, imageList.length));
+    const gameImages = shuffled.slice(0, Math.min(5, imageList.length));
     
-    setCurrentRoundImages(roundImages);
+    setCurrentRoundImages(gameImages);
     setCurrentImageIndex(0);
-    setCurrentImage(roundImages[0]);
+    setCurrentImage(gameImages[0]);
     setRevealedTiles(Array(25).fill(false));
     setAllRevealed(false);
     setShowOriginal(false);
-    setTimerActive(true);
+    setScore(25);
+    setTotalScore(0);
     setQuestionsAnswered(0);
+    setGameCompleted(false);
   };
 
   useEffect(() => {
@@ -127,121 +136,90 @@ const GamePage = () => {
   const handleTileClick = (index: number) => {
     if (revealedTiles[index] || allRevealed) return;
 
-    playClickSound();
-
     const newRevealed = [...revealedTiles];
     newRevealed[index] = true;
     setRevealedTiles(newRevealed);
+    
+    // Decrease score by 5 for each tile revealed
+    setScore(prev => Math.max(0, prev - 5));
   };
 
-  const playClickSound = () => {
-    try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
-      
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
-      
-      oscillator.frequency.value = 800;
-      oscillator.type = 'square';
-      
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-      
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.1);
-    } catch (error) {
-      console.error('Audio error:', error);
-    }
+  const handleCorrectAnswer = () => {
+    if (allRevealed) return;
+
+    setAllRevealed(true);
+    setShowOriginal(true);
+    setTotalScore(prev => prev + score);
+    
+    toast({
+      title: "🎉 ถูกต้อง!",
+      description: `${currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ ${score} คะแนน`,
+    });
+
+    setTimeout(() => {
+      if (currentImageIndex + 1 >= currentRoundImages.length) {
+        // Game completed
+        setGameCompleted(true);
+        toast({
+          title: "🏁 จบเกม!",
+          description: `คะแนนรวม: ${totalScore + score} คะแนน จาก 5 คำถาม`,
+        });
+      } else {
+        nextQuestion();
+      }
+    }, 2000);
   };
 
   const revealAll = () => {
     setRevealedTiles(Array(25).fill(true));
     setAllRevealed(true);
     setShowOriginal(true);
-    setTimerActive(false);
-    
-    // Calculate score based on revealed tiles
-    const revealedCount = revealedTiles.filter(Boolean).length;
-    const points = Math.max(0, 25 - revealedCount);
-    setScore(prev => prev + points);
+    setScore(0); // No points when revealing
     
     setTimeout(() => {
       toast({
-        title: "🎉 เฉลย!",
-        description: `${currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ ${points} คะแนน`,
+        title: "📖 เฉลย!",
+        description: `${currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ 0 คะแนน`,
       });
+      
+      if (currentImageIndex + 1 >= currentRoundImages.length) {
+        // Game completed
+        setGameCompleted(true);
+        toast({
+          title: "🏁 จบเกม!",
+          description: `คะแนนรวม: ${totalScore} คะแนน จาก 5 คำถาม`,
+        });
+      } else {
+        setTimeout(() => nextQuestion(), 1500);
+      }
     }, 500);
   };
 
   const nextQuestion = () => {
-    if (currentRoundImages.length === 0) {
-      startNewRound(images);
-      return;
-    }
-
     const nextIndex = currentImageIndex + 1;
     
-    if (nextIndex >= currentRoundImages.length) {
-      // End of round
-      toast({
-        title: "🏁 จบรอบ!",
-        description: `คะแนนรวม: ${score} คะแนน จาก ${questionsAnswered + 1} คำถาม`,
-      });
-      
-      setTimeout(() => {
-        startNewRound(images);
-      }, 2000);
-      return;
-    }
-
     setCurrentImageIndex(nextIndex);
     setCurrentImage(currentRoundImages[nextIndex]);
     setRevealedTiles(Array(25).fill(false));
     setAllRevealed(false);
     setShowOriginal(false);
-    setTimerActive(true);
+    setScore(25); // Reset score for new question
     setQuestionsAnswered(prev => prev + 1);
-    
-    toast({
-      title: "🔄 คำถามถัดไป",
-      description: `คำถามที่ ${nextIndex + 1}/${currentRoundImages.length}`,
-    });
   };
 
-  const handleTimeUp = () => {
-    if (!allRevealed) {
-      revealAll();
-      toast({
-        title: "⏰ หมดเวลา!",
-        description: "เวลาหมดแล้ว เฉลยอัตโนมัติ",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const resetCurrent = () => {
-    setRevealedTiles(Array(25).fill(false));
-    setAllRevealed(false);
-    setShowOriginal(false);
-    setTimerActive(true);
-    
-    toast({
-      title: "รีเซ็ตแล้ว",
-      description: "เริ่มคำถามนี้ใหม่อีกครั้ง",
-    });
+  const resetGame = () => {
+    loadImages();
   };
 
   const revealedCount = revealedTiles.filter(Boolean).length;
 
   if (loading) {
     return (
-      <div className="min-h-screen p-4 flex items-center justify-center">
-        <Card className="admin-card">
+      <div className="min-h-screen p-4 flex items-center justify-center bg-gray-100">
+        <Card className="bg-white border-gray-300">
           <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-rider-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-muted-foreground">กำลังโหลดรูปภาพ...</p>
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-black">กำลังโหลดรูปภาพ...</p>
           </CardContent>
         </Card>
       </div>
@@ -249,44 +227,42 @@ const GamePage = () => {
   }
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen p-4 bg-gray-100">
       <div className="max-w-4xl mx-auto">
-        {/* Enhanced Header */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link to="/">
-              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform">
+              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
                 <Home className="w-4 h-4" />
               </Button>
             </Link>
             <div className="animate-fade-in">
-              <h1 className="text-3xl font-orbitron font-bold text-rider-gold">
-                {getCategoryDisplayName(category)}
+              <h1 className="text-3xl font-bold text-black">
+                {categoryDisplayName}
               </h1>
-              <p className="text-sm text-muted-foreground">
-                คำถามที่ {currentImageIndex + 1}/{currentRoundImages.length} | คะแนน: {score}
+              <p className="text-sm text-gray-600">
+                {gameCompleted ? 'เกมจบแล้ว' : `คำถามที่ ${currentImageIndex + 1}/5`} | คะแนนรวม: {totalScore + (gameCompleted ? 0 : score)}
               </p>
             </div>
           </div>
           
           <div className="flex items-center gap-4">
-            <GameTimer
-              isActive={timerActive}
-              onTimeUp={handleTimeUp}
-              duration={60}
-            />
-            <div className="text-sm text-muted-foreground animate-pulse">
-              เปิดแล้ว <span className="text-rider-gold font-bold">{revealedCount}</span>/25 ช่อง
+            <div className="text-sm text-gray-600">
+              คะแนนคำถามนี้: <span className="text-blue-600 font-bold">{score}</span>
+            </div>
+            <div className="text-sm text-gray-600">
+              เปิดแล้ว <span className="text-blue-600 font-bold">{revealedCount}</span>/25 ช่อง
             </div>
           </div>
         </div>
 
-        {/* Enhanced Game Info with Transition */}
-        {currentImage && (
-          <Card className="admin-card mb-6 transition-all duration-500 hover:border-rider-gold">
+        {/* Game Info */}
+        {currentImage && !gameCompleted && (
+          <Card className="bg-white border-gray-300 mb-6">
             <CardHeader>
-              <CardTitle className={`text-center font-orbitron transition-all duration-700 ${
-                allRevealed ? 'text-rider-gold animate-glow-pulse' : 'text-rider-red'
+              <CardTitle className={`text-center font-bold transition-all duration-700 ${
+                allRevealed ? 'text-green-600' : 'text-blue-600'
               }`}>
                 <div className="transition-all duration-500 transform">
                   {allRevealed ? (
@@ -304,28 +280,57 @@ const GamePage = () => {
           </Card>
         )}
 
-        {/* Enhanced Game Display */}
-        {currentImage ? (
+        {/* Game Completed Screen */}
+        {gameCompleted && (
+          <Card className="bg-white border-gray-300 mb-6">
+            <CardContent className="p-8 text-center">
+              <h2 className="text-2xl font-bold text-green-600 mb-4">🏁 เกมจบแล้ว!</h2>
+              <p className="text-xl text-black mb-4">คะแนนรวม: {totalScore} / 125 คะแนน</p>
+              <p className="text-gray-600 mb-6">
+                {totalScore >= 100 ? "🌟 ยอดเยี่ยม! คุณรู้จักหมวดหมู่นี้ดีมาก!" :
+                 totalScore >= 75 ? "👍 ดีมาก! คุณมีความรู้ในระดับดี" :
+                 totalScore >= 50 ? "😊 พอใช้! ลองเล่นอีกครั้งเพื่อพัฒนา" :
+                 "💪 ลองใหม่อีกครั้ง! ฝึกฝนแล้วจะเก่งขึ้น"}
+              </p>
+              <div className="flex gap-4 justify-center">
+                <Button
+                  onClick={resetGame}
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
+                >
+                  <Shuffle className="w-4 h-4 mr-2" />
+                  เล่นใหม่
+                </Button>
+                <Link to="/">
+                  <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100">
+                    <Home className="w-4 h-4 mr-2" />
+                    กลับหน้าหลัก
+                  </Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Game Display */}
+        {currentImage && !gameCompleted ? (
           <div className="mb-8">
             {showOriginal && allRevealed ? (
               // Show original full image when revealed
-              <Card className="admin-card border-rider-gold bg-gradient-to-br from-black to-rider-black-light animate-scale-in">
+              <Card className="bg-white border-green-500">
                 <CardContent className="p-6">
                   <div className="text-center mb-4">
-                    <h3 className="text-lg font-bold text-rider-gold animate-fade-in">
+                    <h3 className="text-lg font-bold text-green-600">
                       🖼️ รูปต้นฉบับเต็ม
                     </h3>
                   </div>
-                  <div className="relative rounded-lg overflow-hidden bg-black">
+                  <div className="relative rounded-lg overflow-hidden bg-gray-100">
                     <img
                       src={currentImage.originalImageUrl || currentImage.imageUrl}
                       alt={currentImage.answer}
-                      className="w-full max-h-96 object-contain mx-auto animate-fade-in"
+                      className="w-full max-h-96 object-contain mx-auto"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-30"></div>
-                    {/* Answer moved to bottom */}
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-                      <div className="bg-rider-gold text-black px-6 py-3 rounded-full font-bold text-lg animate-float">
+                      <div className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg">
                         {currentImage.answer}
                       </div>
                     </div>
@@ -343,85 +348,60 @@ const GamePage = () => {
               </div>
             )}
           </div>
-        ) : (
-          <Card className="admin-card">
-            <CardContent className="p-12 text-center">
-              <h3 className="text-xl font-bold text-muted-foreground mb-4">
-                ไม่มีรูปภาพในหมวดหมู่นี้
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                กรุณาเพิ่มรูปภาพในหมวดหมู่ {getCategoryDisplayName(category)} ก่อนเริ่มเล่นเกม
-              </p>
-              <Link to="/">
-                <Button className="hero-button mr-4">
-                  กลับหน้าหลัก
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        )}
+        ) : null}
 
-        {/* Enhanced Control Buttons */}
-        {currentImage && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {/* Control Buttons */}
+        {currentImage && !gameCompleted && (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <Button
+              onClick={handleCorrectAnswer}
+              disabled={allRevealed}
+              className="bg-green-500 hover:bg-green-600 text-white hover:scale-105 transition-all duration-300"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              ถูกต้อง!
+            </Button>
+            
             <Button
               onClick={revealAll}
-              className="hero-button bg-rider-gold hover:bg-rider-gold/80 hover:scale-105 transition-all duration-300 relative overflow-hidden"
+              disabled={allRevealed}
+              className="bg-orange-500 hover:bg-orange-600 text-white hover:scale-105 transition-all duration-300"
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-20 animate-shine"></div>
               <Eye className="w-4 h-4 mr-2" />
-              เฉลยทั้งหมด
+              เฉลย (0 คะแนน)
             </Button>
             
             <Button
-              onClick={resetCurrent}
+              onClick={resetGame}
               variant="outline"
-              className="border-rider-metal text-rider-metal hover:bg-rider-metal hover:text-white hover:scale-105 transition-all duration-300"
+              className="border-gray-400 text-gray-600 hover:bg-gray-100 hover:scale-105 transition-all duration-300"
             >
               <RotateCcw className="w-4 h-4 mr-2" />
-              รีเซ็ตปัจจุบัน
-            </Button>
-            
-            <Button
-              onClick={nextQuestion}
-              className="hero-button hover:scale-105 transition-all duration-300 relative overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-gradient-to-r from-rider-red via-rider-red-dark to-rider-red opacity-20 animate-shine"></div>
-              <Shuffle className="w-4 h-4 mr-2" />
-              คำถามถัดไป
-            </Button>
-            
-            <Button
-              onClick={playClickSound}
-              variant="outline"
-              className="border-rider-gold text-rider-gold hover:bg-rider-gold hover:text-black hover:scale-105 transition-all duration-300"
-            >
-              <Volume2 className="w-4 h-4 mr-2" />
-              ทดสอบเสียง
+              เล่นใหม่
             </Button>
           </div>
         )}
 
-        {/* Enhanced Stats Card */}
-        {currentImage && (
-          <Card className="admin-card mt-8 bg-gradient-to-br from-rider-black to-rider-black-light border-rider-metal">
+        {/* Stats Card */}
+        {currentImage && !gameCompleted && (
+          <Card className="bg-white border-gray-300 mt-8">
             <CardContent className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <div className="transform hover:scale-105 transition-transform">
-                  <div className="text-2xl font-bold text-rider-red animate-pulse">{revealedCount}</div>
-                  <div className="text-sm text-muted-foreground">ช่องที่เปิด</div>
+                  <div className="text-2xl font-bold text-blue-600">{revealedCount}</div>
+                  <div className="text-sm text-gray-600">ช่องที่เปิด</div>
                 </div>
                 <div className="transform hover:scale-105 transition-transform">
-                  <div className="text-2xl font-bold text-rider-gold">{25 - revealedCount}</div>
-                  <div className="text-sm text-muted-foreground">ช่องที่เหลือ</div>
+                  <div className="text-2xl font-bold text-green-600">{25 - revealedCount}</div>
+                  <div className="text-sm text-gray-600">ช่องที่เหลือ</div>
                 </div>
                 <div className="transform hover:scale-105 transition-transform">
-                  <div className="text-2xl font-bold text-rider-metal">{Math.round((revealedCount / 25) * 100)}%</div>
-                  <div className="text-sm text-muted-foreground">ความคืบหน้า</div>
+                  <div className="text-2xl font-bold text-orange-600">{score}</div>
+                  <div className="text-sm text-gray-600">คะแนนคำถามนี้</div>
                 </div>
                 <div className="transform hover:scale-105 transition-transform">
-                  <div className="text-2xl font-bold text-white">{score}</div>
-                  <div className="text-sm text-muted-foreground">คะแนนรวม</div>
+                  <div className="text-2xl font-bold text-black">{totalScore}</div>
+                  <div className="text-sm text-gray-600">คะแนนรวม</div>
                 </div>
               </div>
             </CardContent>

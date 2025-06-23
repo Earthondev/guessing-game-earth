@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Shield, Plus, Trash2 } from "lucide-react";
+import { Settings, Shield, Youtube } from "lucide-react";
 import CategorySelector, { GameCategory } from "@/components/CategorySelector";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -77,12 +77,20 @@ const HomePage = () => {
     setShowAuthModal(false);
   };
 
+  const handleYouTubeClick = () => {
+    window.open('https://www.youtube.com/@OurUsualDay', '_blank');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center justify-center mb-6 gap-6">
+            <Youtube 
+              className="w-12 h-12 text-red-500 cursor-pointer hover:text-red-400 transition-colors" 
+              onClick={handleYouTubeClick}
+            />
             <img 
               src="/lovable-uploads/79f392db-4e14-419b-9565-aed7b93b363b.png" 
               alt="Game Logo" 
@@ -93,12 +101,15 @@ const HomePage = () => {
           <h1 className="text-4xl md:text-6xl font-orbitron font-bold text-green-400 mb-4 animate-text-glow">
             Tile Puzzle Platform
           </h1>
-          <p className="text-xl text-slate-300 max-w-2xl mx-auto">
-            แพลตฟอร์มเกมทายภาพอเนกประสงค์ ท้าทายสมองและความจำของคุณ
+          <p 
+            className="text-xl text-slate-300 max-w-2xl mx-auto cursor-pointer hover:text-green-400 transition-colors"
+            onClick={handleYouTubeClick}
+          >
+            ติดตามพวกเราพร้อมเพื่อน ๆ ได้ที่ช่อง YouTube: Our Usual Day เพื่อไม่พลาดกิจกรรมและเกมสนุก ๆ!
           </p>
         </div>
 
-        {/* Admin Controls */}
+        {/* Admin Controls - Immediate response without waiting */}
         <div className="flex justify-end mb-8 gap-4">
           {isAuthenticated ? (
             <div className="flex gap-2">
@@ -157,12 +168,12 @@ const HomePage = () => {
 
           <Card className="bg-slate-800/50 border-green-400/30 hover:border-green-400 transition-all duration-300 backdrop-blur-sm">
             <CardContent className="p-6 text-center">
-              <div className="text-3xl mb-4">⏱️</div>
+              <div className="text-3xl mb-4">🎮</div>
               <h3 className="font-orbitron font-bold text-lg mb-2 text-green-400">
-                ระบบจับเวลา
+                ระบบคะแนน
               </h3>
               <p className="text-slate-300">
-                เพิ่มความท้าทายด้วยการจับเวลา
+                เริ่มด้วย 25 คะแนน หักทีละ 5 ต่อการเปิดช่อง
               </p>
             </CardContent>
           </Card>

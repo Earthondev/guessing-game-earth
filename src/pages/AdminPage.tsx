@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ArrowLeft, Upload, Trash2, Plus, Save, Eye, Image as ImageIcon, Folder } from "lucide-react";
@@ -34,49 +35,49 @@ const AdminPage = () => {
   const [selectedCategory, setSelectedCategory] = useState("masked_rider");
   const [showCropper, setShowCropper] = useState(false);
   const [croppedImage, setCroppedImage] = useState<string>("");
+  const [categories, setCategories] = useState<any[]>([]);
+  const [selectedCategoryView, setSelectedCategoryView] = useState<string>("");
   const { toast } = useToast();
-
-  const categories = [
-    { value: "masked_rider", label: "มาสค์ไรเดอร์" },
-    { value: "thai_celebrities", label: "ดาราไทย" },
-    { value: "thai_movies", label: "หนังไทย" }
-  ];
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadImages();
+      loadCategories();
     }
   }, [isAuthenticated]);
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4 flex items-center justify-center">
-        <Card className="bg-slate-800/50 border-green-400/30">
-          <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-slate-300">กำลังตรวจสอบสิทธิ์...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (selectedCategoryView) {
+      loadImagesByCategory(selectedCategoryView);
+    }
+  }, [selectedCategoryView]);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+  const loadCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('game_categories')
+        .select('*')
+        .order('created_at');
 
-  const loadImages = async () => {
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
+  const loadImagesByCategory = async (categoryName: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('masked_rider_images')
         .select('*')
+        .eq('category', categoryName)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
       const imagesWithUrls = await Promise.all(
-        data.map(async (img) => {
+        (data || []).map(async (img) => {
           const { data: urlData } = supabase.storage
             .from('masked-rider-images')
             .getPublicUrl(img.storage_path);
@@ -109,6 +110,23 @@ const AdminPage = () => {
       setLoading(false);
     }
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white p-4 flex items-center justify-center">
+        <Card className="bg-white border-gray-300">
+          <CardContent className="p-12 text-center">
+            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-black">กำลังตรวจสอบสิทธิ์...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -183,7 +201,7 @@ const AdminPage = () => {
 
       toast({
         title: "เพิ่มรูปภาพสำเร็จ",
-        description: `เพิ่มรูปภาพในหมวดหมู่ ${categories.find(c => c.value === selectedCategory)?.label} แล้ว`,
+        description: `เพิ่มรูปภาพในหมวดหมู่ ${categories.find(c => c.name === selectedCategory)?.display_name} แล้ว`,
       });
 
       // Reset form
@@ -191,7 +209,11 @@ const AdminPage = () => {
       setPreviewUrl("");
       setCroppedImage("");
       setAnswer("");
-      loadImages();
+      
+      // Reload images if current category matches
+      if (selectedCategoryView === selectedCategory) {
+        loadImagesByCategory(selectedCategory);
+      }
 
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -233,7 +255,7 @@ const AdminPage = () => {
         description: `ลบรูปภาพ "${image.answer}" แล้ว`,
       });
 
-      loadImages();
+      loadImagesByCategory(selectedCategoryView);
     } catch (error) {
       console.error('Error deleting image:', error);
       toast({
@@ -244,26 +266,22 @@ const AdminPage = () => {
     }
   };
 
-  const getCategoryImages = (category: string) => {
-    return images.filter(img => img.category === category);
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-white">
+      <div className="max-w-6xl mx-auto p-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Link to="/">
-              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-green-400 text-green-400 hover:bg-green-400 hover:text-white">
+              <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
                 <ArrowLeft className="w-4 h-4" />
               </Button>
             </Link>
             <div>
-              <h1 className="text-3xl font-orbitron font-bold text-green-400">
+              <h1 className="text-3xl font-bold text-black">
                 ระบบจัดการเกม
               </h1>
-              <p className="text-sm text-slate-300">
+              <p className="text-sm text-gray-600">
                 จัดการหมวดหมู่และรูปภาพสำหรับเกม
               </p>
             </div>
@@ -272,12 +290,12 @@ const AdminPage = () => {
 
         {/* Tabs for different management sections */}
         <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-slate-800 border-green-400/30">
-            <TabsTrigger value="categories" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 border-gray-300">
+            <TabsTrigger value="categories" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-black">
               <Folder className="w-4 h-4 mr-2" />
               จัดการหมวดหมู่
             </TabsTrigger>
-            <TabsTrigger value="images" className="data-[state=active]:bg-green-500 data-[state=active]:text-white">
+            <TabsTrigger value="images" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-black">
               <ImageIcon className="w-4 h-4 mr-2" />
               จัดการรูปภาพ
             </TabsTrigger>
@@ -289,9 +307,9 @@ const AdminPage = () => {
 
           <TabsContent value="images" className="mt-6">
             {/* Upload Form */}
-            <Card className="bg-slate-800/50 border-green-400/30 mb-8">
+            <Card className="bg-white border-gray-300 mb-8">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-green-400">
+                <CardTitle className="flex items-center gap-2 text-black">
                   <Plus className="w-5 h-5" />
                   เพิ่มรูปภาพใหม่
                 </CardTitle>
@@ -300,15 +318,15 @@ const AdminPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-4">
                     <div>
-                      <Label className="text-slate-200">หมวดหมู่</Label>
+                      <Label className="text-black">หมวดหมู่</Label>
                       <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                        <SelectTrigger className="bg-slate-800 border-slate-600 text-white">
+                        <SelectTrigger className="bg-white border-gray-300 text-black">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {categories.map((cat) => (
-                            <SelectItem key={cat.value} value={cat.value}>
-                              {cat.label}
+                            <SelectItem key={cat.name} value={cat.name}>
+                              {cat.display_name}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -316,29 +334,29 @@ const AdminPage = () => {
                     </div>
 
                     <div>
-                      <Label className="text-slate-200">เลือกรูปภาพ</Label>
+                      <Label className="text-black">เลือกรูปภาพ</Label>
                       <Input
                         type="file"
                         accept="image/*"
                         onChange={handleFileSelect}
-                        className="cursor-pointer bg-slate-800 border-slate-600 text-white"
+                        className="cursor-pointer bg-white border-gray-300 text-black"
                       />
                     </div>
 
                     <div>
-                      <Label className="text-slate-200">คำเฉลย</Label>
+                      <Label className="text-black">คำเฉลย</Label>
                       <Input
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
                         placeholder="ใส่คำเฉลย..."
-                        className="bg-slate-800 border-slate-600 text-white"
+                        className="bg-white border-gray-300 text-black"
                       />
                     </div>
 
                     <Button
                       onClick={uploadImage}
                       disabled={loading || !selectedFile || !croppedImage || !answer.trim()}
-                      className="bg-green-500 hover:bg-green-600 text-white w-full"
+                      className="bg-blue-500 hover:bg-blue-600 text-white w-full"
                     >
                       <Save className="w-4 h-4 mr-2" />
                       {loading ? "กำลังบันทึก..." : "บันทึกรูปภาพ"}
@@ -348,13 +366,15 @@ const AdminPage = () => {
                   <div className="space-y-4">
                     {croppedImage && (
                       <div>
-                        <Label className="text-slate-200">ตัวอย่างรูปที่ครอป</Label>
-                        <div className="border rounded-lg p-4 bg-slate-700">
-                          <img
-                            src={croppedImage}
-                            alt="Cropped preview"
-                            className="w-full max-w-xs mx-auto rounded-lg"
-                          />
+                        <Label className="text-black">ตัวอย่างรูปที่ครอป (1:1)</Label>
+                        <div className="border rounded-lg p-4 bg-gray-50">
+                          <div className="w-48 h-48 mx-auto border border-gray-300 rounded-lg overflow-hidden">
+                            <img
+                              src={croppedImage}
+                              alt="Cropped preview"
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
                         </div>
                       </div>
                     )}
@@ -363,76 +383,101 @@ const AdminPage = () => {
               </CardContent>
             </Card>
 
-            {/* Images by Category */}
-            {categories.map((category) => {
-              const categoryImages = getCategoryImages(category.value);
-              return (
-                <Card key={category.value} className="bg-slate-800/50 border-green-400/30 mb-8">
-                  <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <ImageIcon className="w-5 h-5 text-green-400" />
-                        <span className="text-green-400">{category.label}</span>
-                      </div>
-                      <span className="text-sm text-slate-300">
-                        {categoryImages.length} รูปภาพ
+            {/* Category Selection for Viewing Images */}
+            <Card className="bg-white border-gray-300 mb-8">
+              <CardHeader>
+                <CardTitle className="text-black">เลือกหมวดหมู่เพื่อดูรูปภาพ</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Select value={selectedCategoryView} onValueChange={setSelectedCategoryView}>
+                  <SelectTrigger className="bg-white border-gray-300 text-black">
+                    <SelectValue placeholder="เลือกหมวดหมู่..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.name} value={cat.name}>
+                        {cat.display_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardContent>
+            </Card>
+
+            {/* Images Display */}
+            {selectedCategoryView && (
+              <Card className="bg-white border-gray-300">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-5 h-5 text-black" />
+                      <span className="text-black">
+                        {categories.find(c => c.name === selectedCategoryView)?.display_name}
                       </span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {categoryImages.length === 0 ? (
-                      <div className="text-center py-8 text-slate-400">
-                        ยังไม่มีรูปภาพในหมวดหมู่นี้
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {categoryImages.map((image) => (
-                          <Card key={image.id} className="bg-slate-700 border-slate-600 hover:border-green-400 transition-colors">
-                            <CardContent className="p-4">
-                              <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-slate-600">
-                                <img
-                                  src={image.imageUrl}
-                                  alt={image.answer}
-                                  className="w-full h-full object-cover"
-                                />
-                              </div>
-                              <div className="space-y-2">
-                                <p className="font-bold text-green-400">{image.answer}</p>
-                                <p className="text-xs text-slate-400">
-                                  ไฟล์: {image.filename}
-                                </p>
-                                <div className="flex gap-2">
-                                  {image.originalImageUrl && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => window.open(image.originalImageUrl, '_blank')}
-                                      className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-600"
-                                    >
-                                      <Eye className="w-3 h-3 mr-1" />
-                                      รูปต้นฉบับ
-                                    </Button>
-                                  )}
+                    </div>
+                    <span className="text-sm text-gray-600">
+                      {images.length} รูปภาพ
+                    </span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {loading ? (
+                    <div className="text-center py-8">
+                      <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                      <p className="text-black">กำลังโหลด...</p>
+                    </div>
+                  ) : images.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      ยังไม่มีรูปภาพในหมวดหมู่นี้
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {images.map((image) => (
+                        <Card key={image.id} className="bg-gray-50 border-gray-300 hover:border-blue-400 transition-colors">
+                          <CardContent className="p-4">
+                            <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-gray-200">
+                              <img
+                                src={image.imageUrl}
+                                alt={image.answer}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <p className="font-bold text-black">{image.answer}</p>
+                              <p className="text-xs text-gray-500">
+                                ไฟล์: {image.filename}
+                              </p>
+                              <div className="flex gap-2">
+                                {image.originalImageUrl && (
                                   <Button
                                     size="sm"
-                                    variant="destructive"
-                                    onClick={() => deleteImage(image)}
-                                    className="flex-1"
+                                    variant="outline"
+                                    onClick={() => window.open(image.originalImageUrl, '_blank')}
+                                    className="flex-1 border-gray-400 text-gray-600 hover:bg-gray-100"
                                   >
-                                    <Trash2 className="w-3 h-3 mr-1" />
-                                    ลบ
+                                    <Eye className="w-3 h-3 mr-1" />
+                                    รูปต้นฉบับ
                                   </Button>
-                                </div>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => deleteImage(image)}
+                                  className="flex-1"
+                                >
+                                  <Trash2 className="w-3 h-3 mr-1" />
+                                  ลบ
+                                </Button>
                               </div>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -441,7 +486,7 @@ const AdminPage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
               <div className="p-6">
-                <h3 className="text-xl font-bold mb-4 text-black">ครอปรูปภาพ</h3>
+                <h3 className="text-xl font-bold mb-4 text-black">ครอปรูปภาพเป็นสี่เหลี่ยมจัตุรัส (1:1)</h3>
                 <ImageCropper
                   imageUrl={previewUrl}
                   onCropComplete={handleCropComplete}

@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -53,8 +52,9 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
       
-      // Calculate initial crop box size (about 40% of container)
-      const initialSize = Math.min(containerRect.width, containerRect.height) * 0.4;
+      // Calculate initial crop box size as a square (1:1 ratio)
+      const maxSize = Math.min(containerRect.width, containerRect.height) * 0.6;
+      const initialSize = Math.min(maxSize, img.offsetWidth * 0.6, img.offsetHeight * 0.6);
       
       setCropBox({
         x: (containerRect.width - initialSize) / 2,
@@ -77,15 +77,22 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   }, []);
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !imageRef.current) return;
 
     const containerRect = containerRef.current.getBoundingClientRect();
+    const imgRect = imageRef.current.getBoundingClientRect();
     const relativeX = e.clientX - containerRect.left;
     const relativeY = e.clientY - containerRect.top;
 
+    // Calculate image bounds within container
+    const imgOffsetX = imgRect.left - containerRect.left;
+    const imgOffsetY = imgRect.top - containerRect.top;
+    const imgWidth = imgRect.width;
+    const imgHeight = imgRect.height;
+
     if (isDragging) {
-      const newX = Math.max(0, Math.min(relativeX - cropBox.size / 2, containerRect.width - cropBox.size));
-      const newY = Math.max(0, Math.min(relativeY - cropBox.size / 2, containerRect.height - cropBox.size));
+      const newX = Math.max(imgOffsetX, Math.min(relativeX - cropBox.size / 2, imgOffsetX + imgWidth - cropBox.size));
+      const newY = Math.max(imgOffsetY, Math.min(relativeY - cropBox.size / 2, imgOffsetY + imgHeight - cropBox.size));
       
       setCropBox(prev => ({ ...prev, x: newX, y: newY }));
     } else if (isResizing) {
@@ -96,13 +103,21 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
       const distanceY = Math.abs(relativeY - centerY);
       const maxDistance = Math.max(distanceX, distanceY);
       
-      const newSize = Math.min(
+      // Ensure square aspect ratio (1:1) and stay within image bounds
+      let newSize = Math.min(
         Math.max(maxDistance * 2, 50),
-        Math.min(containerRect.width, containerRect.height)
+        imgWidth,
+        imgHeight
       );
       
-      const newX = Math.max(0, Math.min(centerX - newSize / 2, containerRect.width - newSize));
-      const newY = Math.max(0, Math.min(centerY - newSize / 2, containerRect.height - newSize));
+      // Adjust position to keep crop box within image bounds
+      const newX = Math.max(imgOffsetX, Math.min(centerX - newSize / 2, imgOffsetX + imgWidth - newSize));
+      const newY = Math.max(imgOffsetY, Math.min(centerY - newSize / 2, imgOffsetY + imgHeight - newSize));
+      
+      // Recalculate size if position was adjusted
+      const maxSizeFromX = Math.min(newSize, (imgOffsetX + imgWidth - newX) * 2, (newX - imgOffsetX + newSize) * 2);
+      const maxSizeFromY = Math.min(newSize, (imgOffsetY + imgHeight - newY) * 2, (newY - imgOffsetY + newSize) * 2);
+      newSize = Math.min(maxSizeFromX, maxSizeFromY);
       
       setCropBox({ x: newX, y: newY, size: newSize });
     }
@@ -127,13 +142,18 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   }, [isDragging, isResizing, handleMouseMove, handleMouseUp]);
 
   const resetCrop = () => {
-    if (containerRef.current) {
+    if (containerRef.current && imageRef.current) {
       const containerRect = containerRef.current.getBoundingClientRect();
-      const initialSize = Math.min(containerRect.width, containerRect.height) * 0.4;
+      const imgRect = imageRef.current.getBoundingClientRect();
+      const imgOffsetX = imgRect.left - containerRect.left;
+      const imgOffsetY = imgRect.top - containerRect.top;
+      
+      const maxSize = Math.min(imgRect.width, imgRect.height) * 0.6;
+      const initialSize = Math.max(50, maxSize);
       
       setCropBox({
-        x: (containerRect.width - initialSize) / 2,
-        y: (containerRect.height - initialSize) / 2,
+        x: imgOffsetX + (imgRect.width - initialSize) / 2,
+        y: imgOffsetY + (imgRect.height - initialSize) / 2,
         size: initialSize
       });
     }
@@ -146,16 +166,21 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
       const img = imageRef.current;
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
+      const imgRect = img.getBoundingClientRect();
+      
+      // Calculate scale factors
+      const scaleX = img.naturalWidth / imgRect.width;
+      const scaleY = img.naturalHeight / imgRect.height;
       
       // Calculate crop coordinates relative to actual image
-      const scaleX = img.naturalWidth / img.offsetWidth;
-      const scaleY = img.naturalHeight / img.offsetHeight;
+      const imgOffsetX = imgRect.left - containerRect.left;
+      const imgOffsetY = imgRect.top - containerRect.top;
       
       const cropData: CropData = {
-        x: cropBox.x * scaleX,
-        y: cropBox.y * scaleY,
+        x: (cropBox.x - imgOffsetX) * scaleX,
+        y: (cropBox.y - imgOffsetY) * scaleY,
         width: cropBox.size * scaleX,
-        height: cropBox.size * scaleY,
+        height: cropBox.size * scaleY, // Keep it square
         naturalWidth: img.naturalWidth,
         naturalHeight: img.naturalHeight
       };
@@ -166,8 +191,10 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
       
       if (!ctx) throw new Error('Canvas context not available');
       
-      canvas.width = cropData.width;
-      canvas.height = cropData.height;
+      // Set canvas size to square dimensions
+      const outputSize = 512; // Fixed output size for consistency
+      canvas.width = outputSize;
+      canvas.height = outputSize;
       
       // Create image element for canvas
       const imgElement = new Image();
@@ -175,7 +202,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
         ctx.drawImage(
           imgElement,
           cropData.x, cropData.y, cropData.width, cropData.height,
-          0, 0, cropData.width, cropData.height
+          0, 0, outputSize, outputSize
         );
         
         // Convert canvas to blob and create File object
@@ -200,17 +227,17 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   };
 
   return (
-    <Card className="bg-slate-800/50 border-green-400/30">
+    <Card className="bg-white border-gray-300">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-green-400">
+        <CardTitle className="flex items-center gap-2 text-black">
           <Crop className="w-5 h-5" />
-          ครอปรูปภาพสำหรับเกม
+          ครอปรูปภาพสำหรับเกม (1:1)
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div 
           ref={containerRef}
-          className="relative bg-black rounded-lg overflow-hidden"
+          className="relative bg-gray-100 rounded-lg overflow-hidden"
           style={{ height: '400px' }}
         >
           <img
@@ -226,14 +253,14 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
               {/* Overlay */}
               <div className="absolute inset-0 bg-black bg-opacity-50 pointer-events-none" />
               
-              {/* Crop Box */}
+              {/* Crop Box - Always Square */}
               <div
-                className="absolute border-2 border-green-400 bg-transparent cursor-move transition-all duration-200 hover:border-green-300"
+                className="absolute border-2 border-blue-500 bg-transparent cursor-move transition-all duration-200 hover:border-blue-400"
                 style={{
                   left: `${cropBox.x}px`,
                   top: `${cropBox.y}px`,
                   width: `${cropBox.size}px`,
-                  height: `${cropBox.size}px`,
+                  height: `${cropBox.size}px`, // Force square
                   boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
                 }}
                 onMouseDown={(e) => handleMouseDown(e, 'drag')}
@@ -241,25 +268,25 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
                 {/* Grid lines */}
                 <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
                   {Array.from({ length: 9 }).map((_, i) => (
-                    <div key={i} className="border border-green-400 opacity-30" />
+                    <div key={i} className="border border-blue-400 opacity-30" />
                   ))}
                 </div>
                 
-                {/* Resize handles */}
+                {/* Resize handles - corners only for square cropping */}
                 <div
-                  className="absolute -top-1 -left-1 w-3 h-3 bg-green-400 cursor-nw-resize hover:bg-green-300 transition-colors"
+                  className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 cursor-nw-resize hover:bg-blue-400 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'nw')}
                 />
                 <div
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 cursor-ne-resize hover:bg-green-300 transition-colors"
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 cursor-ne-resize hover:bg-blue-400 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'ne')}
                 />
                 <div
-                  className="absolute -bottom-1 -left-1 w-3 h-3 bg-green-400 cursor-sw-resize hover:bg-green-300 transition-colors"
+                  className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 cursor-sw-resize hover:bg-blue-400 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'sw')}
                 />
                 <div
-                  className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 cursor-se-resize hover:bg-green-300 transition-colors"
+                  className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 cursor-se-resize hover:bg-blue-400 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'se')}
                 />
               </div>
@@ -267,12 +294,13 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           )}
         </div>
 
-        <div className="text-sm text-slate-300">
+        <div className="text-sm text-gray-700">
           <p>💡 <strong>คำแนะนำ:</strong></p>
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li>ลากกรอบสี่เหลี่ยมเพื่อเลือกตำแหน่งที่ต้องการ</li>
-            <li>ลากมุมกรอบเพื่อปรับขนาด</li>
+            <li>ลากมุมกรอบเพื่อปรับขนาด (คงอัตราส่วน 1:1)</li>
             <li>เลือกส่วนที่สำคัญของรูปภาพเพื่อเพิ่มความยาก</li>
+            <li>รูปภาพจะถูกครอปเป็นสี่เหลี่ยมจัตุรัสเสมอ</li>
           </ul>
         </div>
 
@@ -280,7 +308,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           <Button
             onClick={resetCrop}
             variant="outline"
-            className="border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
+            className="border-gray-400 text-gray-600 hover:bg-gray-100 hover:text-black"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             รีเซ็ตตำแหน่ง
@@ -289,7 +317,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           <Button
             onClick={onCancel}
             variant="outline"
-            className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
+            className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
           >
             <X className="w-4 h-4 mr-2" />
             ยกเลิก
@@ -297,7 +325,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           
           <Button
             onClick={handleCropConfirm}
-            className="bg-green-500 hover:bg-green-600 text-white flex-1"
+            className="bg-blue-500 hover:bg-blue-600 text-white flex-1"
             disabled={!imageLoaded || !originalFile}
           >
             <Check className="w-4 h-4 mr-2" />

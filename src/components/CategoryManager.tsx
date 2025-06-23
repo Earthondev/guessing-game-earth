@@ -46,7 +46,7 @@ const CategoryManager = () => {
       if (error) throw error;
 
       const categoriesWithImages = await Promise.all(
-        data.map(async (category) => {
+        (data || []).map(async (category) => {
           let coverImageUrl = '';
           if (category.cover_image_path) {
             const { data: urlData } = supabase.storage
@@ -199,9 +199,9 @@ const CategoryManager = () => {
   return (
     <div className="space-y-8">
       {/* Add New Category Form */}
-      <Card className="bg-slate-800/50 border-green-400/30">
+      <Card className="bg-white border-gray-300">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-green-400">
+          <CardTitle className="flex items-center gap-2 text-black">
             <Plus className="w-5 h-5" />
             เพิ่มหมวดหมู่ใหม่
           </CardTitle>
@@ -210,61 +210,61 @@ const CategoryManager = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-slate-200">ชื่อหมวดหมู่ (ภาษาอังกฤษ)</Label>
+                <Label className="text-black">ชื่อหมวดหมู่ (ภาษาอังกฤษ)</Label>
                 <Input
                   value={newCategory.name}
                   onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
                   placeholder="เช่น masked_rider"
-                  className="bg-slate-800 border-slate-600 text-white"
+                  className="bg-white border-gray-300 text-black"
                 />
               </div>
 
               <div>
-                <Label className="text-slate-200">ชื่อที่แสดง</Label>
+                <Label className="text-black">ชื่อที่แสดง</Label>
                 <Input
                   value={newCategory.display_name}
                   onChange={(e) => setNewCategory({...newCategory, display_name: e.target.value})}
                   placeholder="เช่น มาสค์ไรเดอร์"
-                  className="bg-slate-800 border-slate-600 text-white"
+                  className="bg-white border-gray-300 text-black"
                 />
               </div>
 
               <div>
-                <Label className="text-slate-200">คำอธิบาย</Label>
+                <Label className="text-black">คำอธิบาย</Label>
                 <Textarea
                   value={newCategory.description}
                   onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
                   placeholder="คำอธิบายหมวดหมู่..."
-                  className="bg-slate-800 border-slate-600 text-white"
+                  className="bg-white border-gray-300 text-black"
                 />
               </div>
 
               <div>
-                <Label className="text-slate-200">ไอคอน</Label>
+                <Label className="text-black">ไอคอน</Label>
                 <Input
                   value={newCategory.icon}
                   onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
                   placeholder="🎮"
-                  className="bg-slate-800 border-slate-600 text-white"
+                  className="bg-white border-gray-300 text-black"
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label className="text-slate-200">รูปปกหมวดหมู่</Label>
+                <Label className="text-black">รูปปกหมวดหมู่</Label>
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleFileSelect}
-                  className="cursor-pointer bg-slate-800 border-slate-600 text-white"
+                  className="cursor-pointer bg-white border-gray-300 text-black"
                 />
               </div>
 
               {previewUrl && (
                 <div>
-                  <Label className="text-slate-200">ตัวอย่างรูปปก</Label>
-                  <div className="border rounded-lg p-4 bg-slate-700">
+                  <Label className="text-black">ตัวอย่างรูปปก</Label>
+                  <div className="border rounded-lg p-4 bg-gray-50">
                     <img
                       src={previewUrl}
                       alt="Cover preview"
@@ -277,7 +277,7 @@ const CategoryManager = () => {
               <Button
                 onClick={createCategory}
                 disabled={loading}
-                className="w-full bg-green-500 hover:bg-green-600 text-white"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {loading ? "กำลังเพิ่ม..." : "เพิ่มหมวดหมู่"}
@@ -288,29 +288,29 @@ const CategoryManager = () => {
       </Card>
 
       {/* Existing Categories */}
-      <Card className="bg-slate-800/50 border-green-400/30">
+      <Card className="bg-white border-gray-300">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-green-400">
+            <div className="flex items-center gap-2 text-black">
               <ImageIcon className="w-5 h-5" />
               หมวดหมู่ที่มีอยู่
             </div>
-            <span className="text-sm text-slate-300">
+            <span className="text-sm text-gray-600">
               {categories.length} หมวดหมู่
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
           {categories.length === 0 ? (
-            <div className="text-center py-8 text-slate-400">
+            <div className="text-center py-8 text-gray-500">
               ยังไม่มีหมวดหมู่
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {categories.map((category) => (
-                <Card key={category.id} className="bg-slate-700 border-slate-600 hover:border-green-400 transition-colors">
+                <Card key={category.id} className="bg-gray-50 border-gray-300 hover:border-blue-400 transition-colors">
                   <CardContent className="p-4">
-                    <div className="aspect-video mb-3 overflow-hidden rounded-lg bg-slate-600 flex items-center justify-center">
+                    <div className="aspect-video mb-3 overflow-hidden rounded-lg bg-gray-200 flex items-center justify-center">
                       {category.coverImageUrl ? (
                         <img
                           src={category.coverImageUrl}
@@ -322,10 +322,10 @@ const CategoryManager = () => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-green-400">{category.display_name}</h3>
-                      <p className="text-xs text-slate-400">ID: {category.name}</p>
+                      <h3 className="font-bold text-black">{category.display_name}</h3>
+                      <p className="text-xs text-gray-500">ID: {category.name}</p>
                       {category.description && (
-                        <p className="text-sm text-slate-300">{category.description}</p>
+                        <p className="text-sm text-gray-700">{category.description}</p>
                       )}
                       <Button
                         size="sm"
