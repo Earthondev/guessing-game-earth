@@ -87,14 +87,14 @@ const HomePage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6 gap-6">
-            {/* Number 1 Logo only */}
+            {/* New Dynamic Logo */}
             <img 
-              src="/lovable-uploads/number-1-logo.png" 
-              alt="Number 1 Logo" 
-              className="w-20 h-20 drop-shadow-2xl premium-logo"
+              src="/lovable-uploads/new-logo.png" 
+              alt="Game Logo" 
+              className="w-24 h-24 drop-shadow-2xl premium-logo"
             />
             
-            <h1 className="text-4xl md:text-7xl font-orbitron font-bold text-transparent bg-gradient-to-r from-japanese-red via-japanese-red-light to-japanese-gold bg-clip-text mb-4 animate-text-glow drop-shadow-2xl">
+            <h1 className="text-4xl md:text-7xl font-orbitron font-bold text-black mb-4 drop-shadow-2xl">
               TILE PUZZLE PLATFORM
             </h1>
           </div>
