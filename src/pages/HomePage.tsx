@@ -48,7 +48,7 @@ const HomePage = () => {
             displayName: category.display_name,
             description: category.description,
             icon: category.icon || "🎮",
-            color: "green-500",
+            color: "red-500",
             coverImage: coverImageUrl
           };
         })
@@ -82,39 +82,51 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-red-950 via-red-900 to-black">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6 gap-6">
-            <Youtube 
-              className="w-12 h-12 text-red-500 cursor-pointer hover:text-red-400 transition-colors" 
-              onClick={handleYouTubeClick}
-            />
+            {/* New Game Logo */}
             <img 
-              src="/lovable-uploads/79f392db-4e14-419b-9565-aed7b93b363b.png" 
+              src="/lovable-uploads/580a407f-6e75-45a1-a4d9-2d9c72133045.png" 
               alt="Game Logo" 
-              className="w-24 h-24 rounded-full"
+              className="w-20 h-20 drop-shadow-2xl"
             />
+            
+            {/* YouTube Icons */}
+            <div className="flex items-center gap-3">
+              <Youtube 
+                className="w-10 h-10 text-red-500 cursor-pointer hover:text-red-400 transition-colors drop-shadow-lg" 
+                onClick={handleYouTubeClick}
+              />
+              <img 
+                src="/lovable-uploads/79f392db-4e14-419b-9565-aed7b93b363b.png" 
+                alt="Channel Logo" 
+                className="w-16 h-16 rounded-full cursor-pointer hover:scale-105 transition-transform drop-shadow-lg"
+                onClick={handleYouTubeClick}
+              />
+            </div>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-orbitron font-bold text-green-400 mb-4 animate-text-glow">
-            Tile Puzzle Platform
+          <h1 className="text-4xl md:text-7xl font-orbitron font-bold text-transparent bg-gradient-to-r from-red-400 via-red-500 to-red-600 bg-clip-text mb-4 animate-text-glow drop-shadow-2xl">
+            TILE PUZZLE PLATFORM
           </h1>
+          <div className="w-32 h-1 bg-gradient-to-r from-red-500 to-yellow-500 mx-auto mb-6 rounded-full shadow-lg"></div>
           <p 
-            className="text-xl text-slate-300 max-w-2xl mx-auto cursor-pointer hover:text-green-400 transition-colors"
+            className="text-xl text-red-100 max-w-2xl mx-auto cursor-pointer hover:text-red-300 transition-colors leading-relaxed bg-black/20 backdrop-blur-sm rounded-lg p-4 border border-red-500/30"
             onClick={handleYouTubeClick}
           >
             ติดตามพวกเราพร้อมเพื่อน ๆ ได้ที่ช่อง YouTube: Our Usual Day เพื่อไม่พลาดกิจกรรมและเกมสนุก ๆ!
           </p>
         </div>
 
-        {/* Admin Controls - Immediate response without waiting */}
+        {/* Admin Controls */}
         <div className="flex justify-end mb-8 gap-4">
           {isAuthenticated ? (
             <div className="flex gap-2">
               <Link to="/admin">
-                <Button className="bg-green-500 hover:bg-green-600 text-white">
+                <Button className="bg-red-600 hover:bg-red-700 text-white border border-red-500 shadow-lg">
                   <Settings className="w-4 h-4 mr-2" />
                   จัดการระบบ
                 </Button>
@@ -122,7 +134,7 @@ const HomePage = () => {
               <Button
                 variant="outline"
                 onClick={signOut}
-                className="border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+                className="border-red-500 text-red-300 hover:bg-red-600 hover:text-white bg-black/30 backdrop-blur-sm"
               >
                 ออกจากระบบ
               </Button>
@@ -131,7 +143,7 @@ const HomePage = () => {
             <Button
               variant="outline"
               onClick={() => setShowAuthModal(true)}
-              className="border-green-500 text-green-400 hover:bg-green-500 hover:text-white"
+              className="border-red-500 text-red-400 hover:bg-red-600 hover:text-white bg-black/30 backdrop-blur-sm"
             >
               <Shield className="w-4 h-4 mr-2" />
               ผู้ดูแลระบบ
@@ -140,7 +152,7 @@ const HomePage = () => {
         </div>
 
         {/* Game Categories */}
-        <Card className="bg-slate-800/50 border-green-400/30 max-w-4xl mx-auto backdrop-blur-sm">
+        <Card className="bg-black/40 border-red-500/50 max-w-4xl mx-auto backdrop-blur-sm shadow-2xl">
           <CardContent className="p-8">
             <CategorySelector
               categories={categories}
@@ -154,37 +166,37 @@ const HomePage = () => {
 
         {/* Features */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <Card className="bg-slate-800/50 border-green-400/30 hover:border-green-400 transition-all duration-300 backdrop-blur-sm">
+          <Card className="bg-black/40 border-red-500/50 hover:border-red-400 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-red-500/20">
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-4">🎯</div>
-              <h3 className="font-orbitron font-bold text-lg mb-2 text-green-400">
+              <h3 className="font-orbitron font-bold text-lg mb-2 text-red-400">
                 หลายหมวดหมู่
               </h3>
-              <p className="text-slate-300">
+              <p className="text-red-100">
                 เลือกเล่นได้หลากหลายหมวดหมู่ตามความชอบ
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-green-400/30 hover:border-green-400 transition-all duration-300 backdrop-blur-sm">
+          <Card className="bg-black/40 border-red-500/50 hover:border-red-400 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-red-500/20">
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-4">🎮</div>
-              <h3 className="font-orbitron font-bold text-lg mb-2 text-green-400">
+              <h3 className="font-orbitron font-bold text-lg mb-2 text-red-400">
                 ระบบคะแนน
               </h3>
-              <p className="text-slate-300">
+              <p className="text-red-100">
                 เริ่มด้วย 25 คะแนน หักทีละ 5 ต่อการเปิดช่อง
               </p>
             </CardContent>
           </Card>
 
-          <Card className="bg-slate-800/50 border-green-400/30 hover:border-green-400 transition-all duration-300 backdrop-blur-sm">
+          <Card className="bg-black/40 border-red-500/50 hover:border-red-400 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-red-500/20">
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-4">🎨</div>
-              <h3 className="font-orbitron font-bold text-lg mb-2 text-green-400">
+              <h3 className="font-orbitron font-bold text-lg mb-2 text-red-400">
                 ครอปภาพอัจฉริยะ
               </h3>
-              <p className="text-slate-300">
+              <p className="text-red-100">
                 ตัดแต่งภาพให้ได้ความยากที่เหมาะสม
               </p>
             </CardContent>
