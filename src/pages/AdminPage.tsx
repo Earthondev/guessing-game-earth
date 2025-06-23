@@ -60,6 +60,11 @@ const AdminPage = () => {
 
       if (error) throw error;
       setCategories(data || []);
+      
+      // Set default category if categories exist
+      if (data && data.length > 0 && !selectedCategory) {
+        setSelectedCategory(data[0].name);
+      }
     } catch (error) {
       console.error('Error loading categories:', error);
     }

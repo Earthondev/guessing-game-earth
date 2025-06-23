@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Shield, Youtube } from "lucide-react";
+import { Settings, Shield } from "lucide-react";
 import CategorySelector, { GameCategory } from "@/components/CategorySelector";
 import AuthModal from "@/components/AuthModal";
 import { useAuth } from "@/hooks/useAuth";
@@ -77,19 +77,15 @@ const HomePage = () => {
     setShowAuthModal(false);
   };
 
-  const handleYouTubeClick = () => {
-    window.open('https://www.youtube.com/@OurUsualDay', '_blank');
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-japanese-red-darkest via-japanese-red-darker to-japanese-black">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6 gap-6">
-            {/* New Dynamic Logo */}
+            {/* New Logo */}
             <img 
-              src="/lovable-uploads/new-logo.png" 
+              src="/lovable-uploads/80c72ab4-c9fc-465f-9f8a-e53c8affdd27.png" 
               alt="Game Logo" 
               className="w-24 h-24 drop-shadow-2xl premium-logo"
             />
@@ -101,23 +97,7 @@ const HomePage = () => {
           
           <div className="w-32 h-1 bg-gradient-to-r from-japanese-red to-japanese-gold mx-auto mb-6 rounded-full shadow-lg animate-japanese-shine"></div>
           
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <Youtube 
-              className="w-8 h-8 text-japanese-red cursor-pointer hover:text-japanese-red-light transition-colors drop-shadow-lg animate-glow-pulse" 
-              onClick={handleYouTubeClick}
-            />
-            <img 
-              src="/lovable-uploads/79f392db-4e14-419b-9565-aed7b93b363b.png" 
-              alt="Channel Logo" 
-              className="w-12 h-12 rounded-full cursor-pointer hover:scale-105 transition-transform drop-shadow-lg premium-logo"
-              onClick={handleYouTubeClick}
-            />
-          </div>
-          
-          <p 
-            className="text-xl text-red-100 max-w-2xl mx-auto cursor-pointer hover:text-japanese-gold transition-colors leading-relaxed bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-japanese-red/30 shadow-lg hover:shadow-japanese-red/20 animate-fade-in"
-            onClick={handleYouTubeClick}
-          >
+          <p className="text-xl text-red-100 max-w-2xl mx-auto leading-relaxed bg-black/30 backdrop-blur-sm rounded-lg p-4 border border-japanese-red/30 shadow-lg hover:shadow-japanese-red/20 animate-fade-in">
             ติดตามพวกเราพร้อมเพื่อน ๆ ได้ที่ช่อง YouTube: Our Usual Day เพื่อไม่พลาดกิจกรรมและเกมสนุก ๆ!
           </p>
         </div>

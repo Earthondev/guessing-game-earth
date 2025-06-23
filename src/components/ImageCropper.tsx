@@ -1,7 +1,8 @@
+
 import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Crop, RotateCcw, Check, X } from 'lucide-react';
+import { Crop, RotateCcw, Check, X, ZoomIn, ZoomOut } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface ImageCropperProps {
@@ -26,6 +27,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   const [imageLoaded, setImageLoaded] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string>('');
   const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [zoom, setZoom] = useState(1);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -87,8 +89,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
     // Calculate image bounds within container
     const imgOffsetX = imgRect.left - containerRect.left;
     const imgOffsetY = imgRect.top - containerRect.top;
-    const imgWidth = imgRect.width;
-    const imgHeight = imgRect.height;
+    const imgWidth = imgRect.width * zoom;
+    const imgHeight = imgRect.height * zoom;
 
     if (isDragging) {
       const newX = Math.max(imgOffsetX, Math.min(relativeX - cropBox.size / 2, imgOffsetX + imgWidth - cropBox.size));
@@ -121,7 +123,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
       
       setCropBox({ x: newX, y: newY, size: newSize });
     }
-  }, [isDragging, isResizing, cropBox]);
+  }, [isDragging, isResizing, cropBox, zoom]);
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false);
@@ -159,6 +161,14 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
     }
   };
 
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 0.1, 3));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 0.1, 0.5));
+  };
+
   const handleCropConfirm = async () => {
     if (!imageRef.current || !containerRef.current || !originalFile) return;
 
@@ -169,8 +179,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
       const imgRect = img.getBoundingClientRect();
       
       // Calculate scale factors
-      const scaleX = img.naturalWidth / imgRect.width;
-      const scaleY = img.naturalHeight / imgRect.height;
+      const scaleX = img.naturalWidth / (imgRect.width * zoom);
+      const scaleY = img.naturalHeight / (imgRect.height * zoom);
       
       // Calculate crop coordinates relative to actual image
       const imgOffsetX = imgRect.left - containerRect.left;
@@ -244,7 +254,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
             ref={imageRef}
             src={imageUrl}
             alt="Image to crop"
-            className="w-full h-full object-contain"
+            className="w-full h-full object-contain transition-transform duration-200"
+            style={{ transform: `scale(${zoom})` }}
             onLoad={handleImageLoad}
           />
           
@@ -294,11 +305,35 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           )}
         </div>
 
+        {/* Zoom Controls */}
+        <div className="flex items-center justify-center gap-4 p-4 bg-gray-50 rounded-lg">
+          <Button
+            size="sm"
+            onClick={handleZoomOut}
+            disabled={zoom <= 0.5}
+            className="bg-gray-500 hover:bg-gray-600 text-white"
+          >
+            <ZoomOut className="w-4 h-4" />
+          </Button>
+          <span className="text-sm text-gray-700 min-w-[60px] text-center">
+            {Math.round(zoom * 100)}%
+          </span>
+          <Button
+            size="sm"
+            onClick={handleZoomIn}
+            disabled={zoom >= 3}
+            className="bg-gray-500 hover:bg-gray-600 text-white"
+          >
+            <ZoomIn className="w-4 h-4" />
+          </Button>
+        </div>
+
         <div className="text-sm text-gray-700">
           <p>💡 <strong>คำแนะนำ:</strong></p>
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li>ลากกรอบสี่เหลี่ยมเพื่อเลือกตำแหน่งที่ต้องการ</li>
             <li>ลากมุมกรอบเพื่อปรับขนาด (คงอัตราส่วน 1:1)</li>
+            <li>ใช้ปุ่มซูมเพื่อขยาย/ย่อรูปภาพ</li>
             <li>เลือกส่วนที่สำคัญของรูปภาพเพื่อเพิ่มความยาก</li>
             <li>รูปภาพจะถูกครอปเป็นสี่เหลี่ยมจัตุรัสเสมอ</li>
           </ul>
