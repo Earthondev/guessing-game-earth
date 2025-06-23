@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface ImageCropperProps {
   imageUrl: string;
-  onCropComplete: (croppedImageData: string) => void;
+  onCropComplete: (originalFile: File, croppedFile: File) => void;
   onCancel: () => void;
 }
 
@@ -26,9 +26,26 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   const [cropBox, setCropBox] = useState({ x: 50, y: 50, size: 200 });
   const [imageLoaded, setImageLoaded] = useState(false);
   const [resizeHandle, setResizeHandle] = useState<string>('');
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Convert imageUrl to File object when component mounts
+  React.useEffect(() => {
+    const fetchOriginalFile = async () => {
+      try {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], 'original-image.jpg', { type: blob.type });
+        setOriginalFile(file);
+      } catch (error) {
+        console.error('Error converting image URL to File:', error);
+      }
+    };
+
+    fetchOriginalFile();
+  }, [imageUrl]);
 
   const handleImageLoad = () => {
     if (imageRef.current && containerRef.current) {
@@ -123,7 +140,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   };
 
   const handleCropConfirm = async () => {
-    if (!imageRef.current || !containerRef.current) return;
+    if (!imageRef.current || !containerRef.current || !originalFile) return;
 
     try {
       const img = imageRef.current;
@@ -161,9 +178,13 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           0, 0, cropData.width, cropData.height
         );
         
-        // Convert canvas to data URL and pass to callback
-        const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
-        onCropComplete(croppedImageData);
+        // Convert canvas to blob and create File object
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const croppedFile = new File([blob], 'cropped-image.jpg', { type: 'image/jpeg' });
+            onCropComplete(originalFile, croppedFile);
+          }
+        }, 'image/jpeg', 0.9);
       };
       
       imgElement.src = imageUrl;
@@ -179,9 +200,9 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
   };
 
   return (
-    <Card className="admin-card border-rider-gold">
+    <Card className="bg-slate-800/50 border-green-400/30">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-rider-gold">
+        <CardTitle className="flex items-center gap-2 text-green-400">
           <Crop className="w-5 h-5" />
           ครอปรูปภาพสำหรับเกม
         </CardTitle>
@@ -207,7 +228,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
               
               {/* Crop Box */}
               <div
-                className="absolute border-2 border-rider-gold bg-transparent cursor-move transition-all duration-200 hover:border-rider-gold-light"
+                className="absolute border-2 border-green-400 bg-transparent cursor-move transition-all duration-200 hover:border-green-300"
                 style={{
                   left: `${cropBox.x}px`,
                   top: `${cropBox.y}px`,
@@ -220,25 +241,25 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
                 {/* Grid lines */}
                 <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
                   {Array.from({ length: 9 }).map((_, i) => (
-                    <div key={i} className="border border-rider-gold opacity-30" />
+                    <div key={i} className="border border-green-400 opacity-30" />
                   ))}
                 </div>
                 
                 {/* Resize handles */}
                 <div
-                  className="absolute -top-1 -left-1 w-3 h-3 bg-rider-gold cursor-nw-resize hover:bg-rider-gold-light transition-colors"
+                  className="absolute -top-1 -left-1 w-3 h-3 bg-green-400 cursor-nw-resize hover:bg-green-300 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'nw')}
                 />
                 <div
-                  className="absolute -top-1 -right-1 w-3 h-3 bg-rider-gold cursor-ne-resize hover:bg-rider-gold-light transition-colors"
+                  className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 cursor-ne-resize hover:bg-green-300 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'ne')}
                 />
                 <div
-                  className="absolute -bottom-1 -left-1 w-3 h-3 bg-rider-gold cursor-sw-resize hover:bg-rider-gold-light transition-colors"
+                  className="absolute -bottom-1 -left-1 w-3 h-3 bg-green-400 cursor-sw-resize hover:bg-green-300 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'sw')}
                 />
                 <div
-                  className="absolute -bottom-1 -right-1 w-3 h-3 bg-rider-gold cursor-se-resize hover:bg-rider-gold-light transition-colors"
+                  className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 cursor-se-resize hover:bg-green-300 transition-colors"
                   onMouseDown={(e) => handleMouseDown(e, 'resize', 'se')}
                 />
               </div>
@@ -246,7 +267,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           )}
         </div>
 
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-slate-300">
           <p>💡 <strong>คำแนะนำ:</strong></p>
           <ul className="list-disc list-inside space-y-1 ml-4">
             <li>ลากกรอบสี่เหลี่ยมเพื่อเลือกตำแหน่งที่ต้องการ</li>
@@ -259,7 +280,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           <Button
             onClick={resetCrop}
             variant="outline"
-            className="border-rider-metal text-rider-metal hover:bg-rider-metal hover:text-white"
+            className="border-slate-600 text-slate-300 hover:bg-slate-600 hover:text-white"
           >
             <RotateCcw className="w-4 h-4 mr-2" />
             รีเซ็ตตำแหน่ง
@@ -268,7 +289,7 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           <Button
             onClick={onCancel}
             variant="outline"
-            className="border-rider-red text-rider-red hover:bg-rider-red hover:text-white"
+            className="border-red-600 text-red-400 hover:bg-red-600 hover:text-white"
           >
             <X className="w-4 h-4 mr-2" />
             ยกเลิก
@@ -276,8 +297,8 @@ const ImageCropper: React.FC<ImageCropperProps> = ({ imageUrl, onCropComplete, o
           
           <Button
             onClick={handleCropConfirm}
-            className="hero-button flex-1"
-            disabled={!imageLoaded}
+            className="bg-green-500 hover:bg-green-600 text-white flex-1"
+            disabled={!imageLoaded || !originalFile}
           >
             <Check className="w-4 h-4 mr-2" />
             ยืนยันการครอป
