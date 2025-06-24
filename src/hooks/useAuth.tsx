@@ -3,13 +3,17 @@ import { useState, useEffect } from "react";
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(false); // Changed to false for immediate response
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if admin is authenticated from localStorage immediately
-    const authStatus = localStorage.getItem('admin_authenticated');
-    setIsAuthenticated(authStatus === 'true');
-    // No loading delay needed
+    // Check authentication status on component mount
+    const checkAuthStatus = () => {
+      const authStatus = localStorage.getItem('admin_authenticated');
+      setIsAuthenticated(authStatus === 'true');
+      setLoading(false);
+    };
+
+    checkAuthStatus();
   }, []);
 
   const signOut = () => {
