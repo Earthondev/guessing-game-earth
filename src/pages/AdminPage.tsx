@@ -138,23 +138,6 @@ const AdminPageContent = () => {
     }
   };
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-white p-4 flex items-center justify-center">
-        <Card className="bg-white border-gray-300">
-          <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-black">กำลังตรวจสอบสิทธิ์...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
