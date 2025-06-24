@@ -12,10 +12,10 @@ const GameInfo = ({ currentImage, allRevealed, gameCompleted }: GameInfoProps) =
   if (gameCompleted) return null;
 
   return (
-    <Card className="bg-white border-gray-300 mb-6">
+    <Card className="bg-gray-900 border-red-500 border-2 mb-6">
       <CardHeader>
         <CardTitle className={`text-center font-bold transition-all duration-700 ${
-          allRevealed ? 'text-green-600' : 'text-blue-600'
+          allRevealed ? 'text-green-400' : 'text-red-400'
         }`}>
           <div className="transition-all duration-500 transform">
             {allRevealed ? (

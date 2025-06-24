@@ -1,0 +1,228 @@
+
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { X, Save } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+
+interface GameCategory {
+  id: string;
+  name: string;
+  display_name: string;
+  description: string | null;
+  icon: string | null;
+  cover_image_path: string | null;
+  coverImageUrl?: string;
+}
+
+interface EditCategoryModalProps {
+  category: GameCategory;
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdate: () => void;
+}
+
+const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategoryModalProps) => {
+  const [editData, setEditData] = useState({
+    display_name: '',
+    description: '',
+    icon: '🎮'
+  });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (category) {
+      setEditData({
+        display_name: category.display_name,
+        description: category.description || '',
+        icon: category.icon || '🎮'
+      });
+      setPreviewUrl(category.coverImageUrl || '');
+    }
+  }, [category]);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "ไฟล์ไม่ถูกต้อง",
+          description: "กรุณาเลือกไฟล์รูปภาพเท่านั้น",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
+  const updateCategory = async () => {
+    if (!editData.display_name.trim()) {
+      toast({
+        title: "กรุณากรอกชื่อที่แสดง",
+        description: "ชื่อที่แสดงเป็นข้อมูลที่จำเป็น",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      let coverImagePath = category.cover_image_path;
+
+      // Upload new cover image if selected
+      if (selectedFile) {
+        // Delete old image if exists
+        if (category.cover_image_path) {
+          await supabase.storage
+            .from('category-covers')
+            .remove([category.cover_image_path]);
+        }
+
+        const timestamp = Date.now();
+        const fileName = `cover_${timestamp}_${selectedFile.name}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('category-covers')
+          .upload(fileName, selectedFile);
+
+        if (uploadError) throw uploadError;
+        coverImagePath = fileName;
+      }
+
+      // Update category
+      const { error: dbError } = await supabase
+        .from('game_categories')
+        .update({
+          display_name: editData.display_name.trim(),
+          description: editData.description.trim() || null,
+          icon: editData.icon,
+          cover_image_path: coverImagePath
+        })
+        .eq('id', category.id);
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "อัปเดตหมวดหมู่สำเร็จ",
+        description: `อัปเดตหมวดหมู่ "${editData.display_name}" แล้ว`,
+      });
+
+      onUpdate();
+      onClose();
+
+    } catch (error) {
+      console.error('Error updating category:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถอัปเดตหมวดหมู่ได้",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+      <Card className="bg-gray-900 border-red-500 border-2 max-w-2xl w-full max-h-[90vh] overflow-auto">
+        <CardHeader className="border-b border-gray-700">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-red-400">แก้ไขหมวดหมู่</CardTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onClose}
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+            >
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-300">ชื่อที่แสดง</Label>
+                <Input
+                  value={editData.display_name}
+                  onChange={(e) => setEditData({...editData, display_name: e.target.value})}
+                  placeholder="เช่น มาสค์ไรเดอร์"
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <Label className="text-gray-300">คำอธิบาย</Label>
+                <Textarea
+                  value={editData.description}
+                  onChange={(e) => setEditData({...editData, description: e.target.value})}
+                  placeholder="คำอธิบายหมวดหมู่..."
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
+                />
+              </div>
+
+              <div>
+                <Label className="text-gray-300">ไอคอน</Label>
+                <Input
+                  value={editData.icon}
+                  onChange={(e) => setEditData({...editData, icon: e.target.value})}
+                  placeholder="🎮"
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-gray-300">รูปปกหมวดหมู่</Label>
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="cursor-pointer bg-gray-800 border-gray-600 text-white file:bg-red-600 file:border-0 file:text-white"
+                />
+              </div>
+
+              {previewUrl && (
+                <div>
+                  <Label className="text-gray-300">ตัวอย่างรูปปก</Label>
+                  <div className="border border-gray-600 rounded-lg p-4 bg-gray-800">
+                    <img
+                      src={previewUrl}
+                      alt="Cover preview"
+                      className="w-full max-w-xs mx-auto rounded-lg"
+                    />
+                  </div>
+                </div>
+              )}
+
+              <Button
+                onClick={updateCategory}
+                disabled={loading}
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {loading ? "กำลังอัปเดต..." : "อัปเดตหมวดหมู่"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export default EditCategoryModal;

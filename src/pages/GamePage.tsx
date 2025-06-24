@@ -31,11 +31,11 @@ const GamePage = () => {
 
   if (gameState.loading) {
     return (
-      <div className="min-h-screen p-4 flex items-center justify-center bg-gray-100">
-        <Card className="bg-white border-gray-300">
+      <div className="min-h-screen p-4 flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
+        <Card className="bg-gray-900 border-red-500 border-2">
           <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-black">กำลังโหลดรูปภาพ...</p>
+            <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-white">กำลังโหลดรูปภาพ...</p>
           </CardContent>
         </Card>
       </div>
@@ -43,7 +43,7 @@ const GamePage = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-gray-100">
+    <div className="min-h-screen p-4 bg-gradient-to-br from-gray-900 via-black to-gray-800">
       <div className="max-w-4xl mx-auto">
         <GameHeader
           categoryDisplayName={gameState.categoryDisplayName}

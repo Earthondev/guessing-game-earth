@@ -18,21 +18,21 @@ const GameCompleted = ({ totalScore, onResetGame }: GameCompletedProps) => {
   };
 
   return (
-    <Card className="bg-white border-gray-300 mb-6">
+    <Card className="bg-gray-900 border-green-500 border-2 mb-6">
       <CardContent className="p-8 text-center">
-        <h2 className="text-2xl font-bold text-green-600 mb-4">🏁 เกมจบแล้ว!</h2>
-        <p className="text-xl text-black mb-4">คะแนนรวม: {totalScore} / 125 คะแนน</p>
-        <p className="text-gray-600 mb-6">{getScoreMessage(totalScore)}</p>
+        <h2 className="text-2xl font-bold text-green-400 mb-4">🏁 เกมจบแล้ว!</h2>
+        <p className="text-xl text-white mb-4">คะแนนรวม: {totalScore} / 125 คะแนน</p>
+        <p className="text-gray-300 mb-6">{getScoreMessage(totalScore)}</p>
         <div className="flex gap-4 justify-center">
           <Button
             onClick={onResetGame}
-            className="bg-blue-500 hover:bg-blue-600 text-white"
+            className="bg-red-600 hover:bg-red-700 text-white"
           >
             <Shuffle className="w-4 h-4 mr-2" />
             เล่นใหม่
           </Button>
           <Link to="/">
-            <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100">
+            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
               <Home className="w-4 h-4 mr-2" />
               กลับหน้าหลัก
             </Button>

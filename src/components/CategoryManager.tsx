@@ -4,9 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2, Upload, Image as ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Upload, Image as ImageIcon, Edit } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import EditCategoryModal from './EditCategoryModal';
 
 interface GameCategory {
   id: string;
@@ -29,6 +30,8 @@ const CategoryManager = () => {
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>('');
+  const [editingCategory, setEditingCategory] = useState<GameCategory | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -107,7 +110,6 @@ const CategoryManager = () => {
     try {
       let coverImagePath = null;
 
-      // Upload cover image if selected
       if (selectedFile) {
         const timestamp = Date.now();
         const fileName = `cover_${timestamp}_${selectedFile.name}`;
@@ -120,7 +122,6 @@ const CategoryManager = () => {
         coverImagePath = fileName;
       }
 
-      // Create category
       const { error: dbError } = await supabase
         .from('game_categories')
         .insert({
@@ -138,7 +139,6 @@ const CategoryManager = () => {
         description: `เพิ่มหมวดหมู่ "${newCategory.display_name}" แล้ว`,
       });
 
-      // Reset form
       setNewCategory({
         name: '',
         display_name: '',
@@ -165,14 +165,12 @@ const CategoryManager = () => {
     if (!confirm(`ต้องการลบหมวดหมู่ "${category.display_name}" หรือไม่?`)) return;
 
     try {
-      // Delete cover image if exists
       if (category.cover_image_path) {
         await supabase.storage
           .from('category-covers')
           .remove([category.cover_image_path]);
       }
 
-      // Delete category
       const { error } = await supabase
         .from('game_categories')
         .delete()
@@ -196,12 +194,22 @@ const CategoryManager = () => {
     }
   };
 
+  const openEditModal = (category: GameCategory) => {
+    setEditingCategory(category);
+    setIsEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditingCategory(null);
+    setIsEditModalOpen(false);
+  };
+
   return (
     <div className="space-y-8">
       {/* Add New Category Form */}
-      <Card className="bg-white border-gray-300">
+      <Card className="bg-gray-900 border-red-500 border-2">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-black">
+          <CardTitle className="flex items-center gap-2 text-red-400">
             <Plus className="w-5 h-5" />
             เพิ่มหมวดหมู่ใหม่
           </CardTitle>
@@ -210,61 +218,61 @@ const CategoryManager = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-black">ชื่อหมวดหมู่ (ภาษาอังกฤษ)</Label>
+                <Label className="text-gray-300">ชื่อหมวดหมู่ (ภาษาอังกฤษ)</Label>
                 <Input
                   value={newCategory.name}
                   onChange={(e) => setNewCategory({...newCategory, name: e.target.value})}
                   placeholder="เช่น masked_rider"
-                  className="bg-white border-gray-300 text-black"
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
                 />
               </div>
 
               <div>
-                <Label className="text-black">ชื่อที่แสดง</Label>
+                <Label className="text-gray-300">ชื่อที่แสดง</Label>
                 <Input
                   value={newCategory.display_name}
                   onChange={(e) => setNewCategory({...newCategory, display_name: e.target.value})}
                   placeholder="เช่น มาสค์ไรเดอร์"
-                  className="bg-white border-gray-300 text-black"
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
                 />
               </div>
 
               <div>
-                <Label className="text-black">คำอธิบาย</Label>
+                <Label className="text-gray-300">คำอธิบาย</Label>
                 <Textarea
                   value={newCategory.description}
                   onChange={(e) => setNewCategory({...newCategory, description: e.target.value})}
                   placeholder="คำอธิบายหมวดหมู่..."
-                  className="bg-white border-gray-300 text-black"
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
                 />
               </div>
 
               <div>
-                <Label className="text-black">ไอคอน</Label>
+                <Label className="text-gray-300">ไอคอน</Label>
                 <Input
                   value={newCategory.icon}
                   onChange={(e) => setNewCategory({...newCategory, icon: e.target.value})}
                   placeholder="🎮"
-                  className="bg-white border-gray-300 text-black"
+                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
                 />
               </div>
             </div>
 
             <div className="space-y-4">
               <div>
-                <Label className="text-black">รูปปกหมวดหมู่</Label>
+                <Label className="text-gray-300">รูปปกหมวดหมู่</Label>
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleFileSelect}
-                  className="cursor-pointer bg-white border-gray-300 text-black"
+                  className="cursor-pointer bg-gray-800 border-gray-600 text-white file:bg-red-600 file:border-0 file:text-white"
                 />
               </div>
 
               {previewUrl && (
                 <div>
-                  <Label className="text-black">ตัวอย่างรูปปก</Label>
-                  <div className="border rounded-lg p-4 bg-gray-50">
+                  <Label className="text-gray-300">ตัวอย่างรูปปก</Label>
+                  <div className="border border-gray-600 rounded-lg p-4 bg-gray-800">
                     <img
                       src={previewUrl}
                       alt="Cover preview"
@@ -277,7 +285,7 @@ const CategoryManager = () => {
               <Button
                 onClick={createCategory}
                 disabled={loading}
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+                className="w-full bg-red-600 hover:bg-red-700 text-white"
               >
                 <Plus className="w-4 h-4 mr-2" />
                 {loading ? "กำลังเพิ่ม..." : "เพิ่มหมวดหมู่"}
@@ -288,14 +296,14 @@ const CategoryManager = () => {
       </Card>
 
       {/* Existing Categories */}
-      <Card className="bg-white border-gray-300">
+      <Card className="bg-gray-900 border-red-500 border-2">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-black">
+            <div className="flex items-center gap-2 text-red-400">
               <ImageIcon className="w-5 h-5" />
               หมวดหมู่ที่มีอยู่
             </div>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-400">
               {categories.length} หมวดหมู่
             </span>
           </CardTitle>
@@ -308,9 +316,9 @@ const CategoryManager = () => {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {categories.map((category) => (
-                <Card key={category.id} className="bg-gray-50 border-gray-300 hover:border-blue-400 transition-colors">
+                <Card key={category.id} className="bg-gray-800 border-gray-600 hover:border-red-500 transition-colors">
                   <CardContent className="p-4">
-                    <div className="aspect-video mb-3 overflow-hidden rounded-lg bg-gray-200 flex items-center justify-center">
+                    <div className="aspect-video mb-3 overflow-hidden rounded-lg bg-gray-700 flex items-center justify-center">
                       {category.coverImageUrl ? (
                         <img
                           src={category.coverImageUrl}
@@ -322,20 +330,30 @@ const CategoryManager = () => {
                       )}
                     </div>
                     <div className="space-y-2">
-                      <h3 className="font-bold text-black">{category.display_name}</h3>
-                      <p className="text-xs text-gray-500">ID: {category.name}</p>
+                      <h3 className="font-bold text-white">{category.display_name}</h3>
+                      <p className="text-xs text-gray-400">ID: {category.name}</p>
                       {category.description && (
-                        <p className="text-sm text-gray-700">{category.description}</p>
+                        <p className="text-sm text-gray-300">{category.description}</p>
                       )}
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => deleteCategory(category)}
-                        className="w-full"
-                      >
-                        <Trash2 className="w-3 h-3 mr-1" />
-                        ลบหมวดหมู่
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => openEditModal(category)}
+                          className="flex-1 bg-silver-600 hover:bg-silver-700 text-black"
+                        >
+                          <Edit className="w-3 h-3 mr-1" />
+                          แก้ไข
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => deleteCategory(category)}
+                          className="flex-1"
+                        >
+                          <Trash2 className="w-3 h-3 mr-1" />
+                          ลบ
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -344,6 +362,16 @@ const CategoryManager = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Category Modal */}
+      {editingCategory && (
+        <EditCategoryModal
+          category={editingCategory}
+          isOpen={isEditModalOpen}
+          onClose={closeEditModal}
+          onUpdate={loadCategories}
+        />
+      )}
     </div>
   );
 };

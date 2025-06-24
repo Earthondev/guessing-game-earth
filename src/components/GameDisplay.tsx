@@ -20,14 +20,14 @@ const GameDisplay = ({
 }: GameDisplayProps) => {
   if (showOriginal && allRevealed) {
     return (
-      <Card className="bg-white border-green-500">
+      <Card className="bg-gray-900 border-green-500 border-2">
         <CardContent className="p-6">
           <div className="text-center mb-4">
-            <h3 className="text-lg font-bold text-green-600">
+            <h3 className="text-lg font-bold text-green-400">
               🖼️ รูปต้นฉบับเต็ม
             </h3>
           </div>
-          <div className="relative rounded-lg overflow-hidden bg-gray-100">
+          <div className="relative rounded-lg overflow-hidden bg-gray-800">
             <img
               src={currentImage.originalImageUrl || currentImage.imageUrl}
               alt={currentImage.answer}
@@ -38,7 +38,7 @@ const GameDisplay = ({
               }}
             />
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-              <div className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg">
+              <div className="bg-green-600 text-white px-6 py-3 rounded-full font-bold text-lg border-2 border-green-400">
                 {currentImage.answer}
               </div>
             </div>
