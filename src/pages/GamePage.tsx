@@ -121,8 +121,13 @@ const GamePage = () => {
         })
       );
 
-      // Filter out any failed image processing
-      const validImages = imagesWithUrls.filter((img): img is ImageData => img !== null);
+      // Filter out any failed image processing and ensure we have valid ImageData objects
+      const validImages = imagesWithUrls.filter((img): img is ImageData => {
+        return img !== null && 
+               typeof img.id === 'string' && 
+               typeof img.imageUrl === 'string' && 
+               typeof img.answer === 'string';
+      });
 
       if (validImages.length === 0) {
         toast({
