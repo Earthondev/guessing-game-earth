@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, RotateCcw, Eye, Shuffle, Home, CheckCircle } from "lucide-react";
@@ -30,6 +29,7 @@ const GamePage = () => {
   const [totalScore, setTotalScore] = useState(0);
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
   const [gameCompleted, setGameCompleted] = useState(false);
+  const [categoryDisplayName, setCategoryDisplayName] = useState('');
   const { toast } = useToast();
 
   const getCategoryDisplayName = async (cat: string) => {
@@ -38,15 +38,13 @@ const GamePage = () => {
         .from('game_categories')
         .select('display_name')
         .eq('name', cat)
-        .single();
+        .maybeSingle();
       
       return data?.display_name || 'ไม่ทราบหมวดหมู่';
     } catch {
       return 'ไม่ทราบหมวดหมู่';
     }
   };
-
-  const [categoryDisplayName, setCategoryDisplayName] = useState('');
 
   useEffect(() => {
     getCategoryDisplayName(category).then(setCategoryDisplayName);
@@ -55,14 +53,34 @@ const GamePage = () => {
   const loadImages = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      // First, get category information
+      const { data: categoryData } = await supabase
+        .from('game_categories')
+        .select('*')
+        .eq('name', category)
+        .maybeSingle();
+
+      if (!categoryData) {
+        toast({
+          title: "ไม่พบหมวดหมู่",
+          description: `ไม่พบหมวดหมู่ ${category} ในระบบ`,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Then get images for this category
+      const { data: imagesData, error } = await supabase
         .from('masked_rider_images')
         .select('*')
         .eq('category', category);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading images:', error);
+        throw error;
+      }
 
-      if (!data || data.length === 0) {
+      if (!imagesData || imagesData.length === 0) {
         toast({
           title: "ไม่มีรูปภาพ",
           description: `ไม่พบรูปภาพในหมวดหมู่ ${categoryDisplayName}`,
@@ -71,38 +89,56 @@ const GamePage = () => {
         return;
       }
 
-      // Get public URLs for each image (both cropped and original)
+      // Process images and get public URLs
       const imagesWithUrls = await Promise.all(
-        data.map(async (img) => {
-          const { data: croppedUrlData } = supabase.storage
-            .from('masked-rider-images')
-            .getPublicUrl(img.storage_path);
-          
-          let originalImageUrl = croppedUrlData.publicUrl;
-          
-          // Get original image URL if exists
-          if (img.original_storage_path) {
-            const { data: originalUrlData } = supabase.storage
+        imagesData.map(async (img) => {
+          try {
+            // Get cropped image URL
+            const { data: croppedUrlData } = supabase.storage
               .from('masked-rider-images')
-              .getPublicUrl(img.original_storage_path);
-            originalImageUrl = originalUrlData.publicUrl;
+              .getPublicUrl(img.storage_path);
+            
+            let originalImageUrl = croppedUrlData.publicUrl;
+            
+            // Get original image URL if exists
+            if (img.original_storage_path) {
+              const { data: originalUrlData } = supabase.storage
+                .from('masked-rider-images')
+                .getPublicUrl(img.original_storage_path);
+              originalImageUrl = originalUrlData.publicUrl;
+            }
+            
+            return {
+              id: img.id,
+              imageUrl: croppedUrlData.publicUrl,
+              originalImageUrl: originalImageUrl,
+              answer: img.answer
+            };
+          } catch (error) {
+            console.error('Error processing image:', img.filename, error);
+            return null;
           }
-          
-          return {
-            id: img.id,
-            imageUrl: croppedUrlData.publicUrl,
-            originalImageUrl: originalImageUrl,
-            answer: img.answer
-          };
         })
       );
 
-      startNewGame(imagesWithUrls);
+      // Filter out any failed image processing
+      const validImages = imagesWithUrls.filter((img): img is ImageData => img !== null);
+
+      if (validImages.length === 0) {
+        toast({
+          title: "เกิดข้อผิดพลาด",
+          description: "ไม่สามารถโหลดรูปภาพได้",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      startNewGame(validImages);
     } catch (error) {
       console.error('Error loading images:', error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถโหลดรูปภาพได้",
+        description: "ไม่สามารถโหลดข้อมูลเกมได้",
         variant: "destructive",
       });
     } finally {
@@ -328,6 +364,11 @@ const GamePage = () => {
                       src={currentImage.originalImageUrl || currentImage.imageUrl}
                       alt={currentImage.answer}
                       className="w-full max-h-96 object-contain mx-auto"
+                      onError={(e) => {
+                        console.error('Error loading original image:', e);
+                        // Fallback to cropped image if original fails
+                        (e.target as HTMLImageElement).src = currentImage.imageUrl;
+                      }}
                     />
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                       <div className="bg-green-500 text-white px-6 py-3 rounded-full font-bold text-lg">
