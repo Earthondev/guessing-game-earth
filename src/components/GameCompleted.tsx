@@ -1,0 +1,46 @@
+
+import { Link } from "react-router-dom";
+import { Shuffle, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+
+interface GameCompletedProps {
+  totalScore: number;
+  onResetGame: () => void;
+}
+
+const GameCompleted = ({ totalScore, onResetGame }: GameCompletedProps) => {
+  const getScoreMessage = (score: number) => {
+    if (score >= 100) return "🌟 ยอดเยี่ยม! คุณรู้จักหมวดหมู่นี้ดีมาก!";
+    if (score >= 75) return "👍 ดีมาก! คุณมีความรู้ในระดับดี";
+    if (score >= 50) return "😊 พอใช้! ลองเล่นอีกครั้งเพื่อพัฒนา";
+    return "💪 ลองใหม่อีกครั้ง! ฝึกฝนแล้วจะเก่งขึ้น";
+  };
+
+  return (
+    <Card className="bg-white border-gray-300 mb-6">
+      <CardContent className="p-8 text-center">
+        <h2 className="text-2xl font-bold text-green-600 mb-4">🏁 เกมจบแล้ว!</h2>
+        <p className="text-xl text-black mb-4">คะแนนรวม: {totalScore} / 125 คะแนน</p>
+        <p className="text-gray-600 mb-6">{getScoreMessage(totalScore)}</p>
+        <div className="flex gap-4 justify-center">
+          <Button
+            onClick={onResetGame}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <Shuffle className="w-4 h-4 mr-2" />
+            เล่นใหม่
+          </Button>
+          <Link to="/">
+            <Button variant="outline" className="border-gray-400 text-gray-600 hover:bg-gray-100">
+              <Home className="w-4 h-4 mr-2" />
+              กลับหน้าหลัก
+            </Button>
+          </Link>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default GameCompleted;

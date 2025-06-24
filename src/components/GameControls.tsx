@@ -1,0 +1,50 @@
+
+import { CheckCircle, Eye, RotateCcw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+interface GameControlsProps {
+  allRevealed: boolean;
+  onCorrectAnswer: () => void;
+  onRevealAll: () => void;
+  onResetGame: () => void;
+}
+
+const GameControls = ({ 
+  allRevealed, 
+  onCorrectAnswer, 
+  onRevealAll, 
+  onResetGame 
+}: GameControlsProps) => {
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <Button
+        onClick={onCorrectAnswer}
+        disabled={allRevealed}
+        className="bg-green-500 hover:bg-green-600 text-white hover:scale-105 transition-all duration-300"
+      >
+        <CheckCircle className="w-4 h-4 mr-2" />
+        ถูกต้อง!
+      </Button>
+      
+      <Button
+        onClick={onRevealAll}
+        disabled={allRevealed}
+        className="bg-orange-500 hover:bg-orange-600 text-white hover:scale-105 transition-all duration-300"
+      >
+        <Eye className="w-4 h-4 mr-2" />
+        เฉลย (0 คะแนน)
+      </Button>
+      
+      <Button
+        onClick={onResetGame}
+        variant="outline"
+        className="border-gray-400 text-gray-600 hover:bg-gray-100 hover:scale-105 transition-all duration-300"
+      >
+        <RotateCcw className="w-4 h-4 mr-2" />
+        เล่นใหม่
+      </Button>
+    </div>
+  );
+};
+
+export default GameControls;
