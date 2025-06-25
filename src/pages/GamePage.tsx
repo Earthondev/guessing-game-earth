@@ -20,6 +20,7 @@ const GamePage = () => {
     handleTileClick,
     handleCorrectAnswer,
     revealAll,
+    nextQuestion,
     resetGame,
   } = useGameState(category);
 
@@ -28,6 +29,7 @@ const GamePage = () => {
   }, [category]);
 
   const revealedCount = gameState.revealedTiles.filter(Boolean).length;
+  const canGoNext = gameState.allRevealed && gameState.currentImageIndex + 1 < gameState.currentRoundImages.length;
 
   if (gameState.loading) {
     return (
@@ -77,11 +79,13 @@ const GamePage = () => {
               allRevealed={gameState.allRevealed}
               revealedTiles={gameState.revealedTiles}
               onTileClick={handleTileClick}
+              onNextQuestion={nextQuestion}
+              canGoNext={canGoNext}
             />
           </div>
         )}
 
-        {gameState.currentImage && !gameState.gameCompleted && (
+        {gameState.currentImage && !gameState.gameCompleted && !gameState.allRevealed && (
           <GameControls
             allRevealed={gameState.allRevealed}
             onCorrectAnswer={handleCorrectAnswer}
@@ -90,7 +94,7 @@ const GamePage = () => {
           />
         )}
 
-        {gameState.currentImage && !gameState.gameCompleted && (
+        {gameState.currentImage && !gameState.gameCompleted && !gameState.allRevealed && (
           <GameStats
             revealedCount={revealedCount}
             score={gameState.score}

@@ -2,6 +2,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import TileGrid from "@/components/TileGrid";
 import { ImageData } from "@/types/game";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 interface GameDisplayProps {
   currentImage: ImageData;
@@ -9,6 +11,8 @@ interface GameDisplayProps {
   allRevealed: boolean;
   revealedTiles: boolean[];
   onTileClick: (index: number) => void;
+  onNextQuestion?: () => void;
+  canGoNext?: boolean;
 }
 
 const GameDisplay = ({ 
@@ -16,7 +20,9 @@ const GameDisplay = ({
   showOriginal, 
   allRevealed, 
   revealedTiles, 
-  onTileClick 
+  onTileClick,
+  onNextQuestion,
+  canGoNext
 }: GameDisplayProps) => {
   if (showOriginal && allRevealed) {
     return (
@@ -24,10 +30,10 @@ const GameDisplay = ({
         <CardContent className="p-6">
           <div className="text-center mb-4">
             <h3 className="text-lg font-bold text-green-400">
-              🖼️ รูปต้นฉบับเต็ม
+              🖼️ เฉลย: {currentImage.answer}
             </h3>
           </div>
-          <div className="relative rounded-lg overflow-hidden bg-gray-800">
+          <div className="relative rounded-lg overflow-hidden bg-gray-800 mb-4">
             <img
               src={currentImage.originalImageUrl || currentImage.imageUrl}
               alt={currentImage.answer}
@@ -37,12 +43,18 @@ const GameDisplay = ({
                 (e.target as HTMLImageElement).src = currentImage.imageUrl;
               }}
             />
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-              <div className="bg-green-600 text-white px-6 py-3 rounded-full font-bold text-lg border-2 border-green-400">
-                {currentImage.answer}
-              </div>
-            </div>
           </div>
+          {canGoNext && onNextQuestion && (
+            <div className="text-center">
+              <Button
+                onClick={onNextQuestion}
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                <ArrowRight className="w-4 h-4 mr-2" />
+                ข้อถัดไป
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     );

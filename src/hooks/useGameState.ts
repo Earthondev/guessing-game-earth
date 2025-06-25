@@ -92,18 +92,6 @@ export const useGameState = (category: string) => {
       title: "🎉 ถูกต้อง!",
       description: `${gameState.currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ ${gameState.score} คะแนน`,
     });
-
-    setTimeout(() => {
-      if (gameState.currentImageIndex + 1 >= gameState.currentRoundImages.length) {
-        setGameState(prev => ({ ...prev, gameCompleted: true }));
-        toast({
-          title: "🏁 จบเกม!",
-          description: `คะแนนรวม: ${gameState.totalScore + gameState.score} คะแนน จาก 5 คำถาม`,
-        });
-      } else {
-        nextQuestion();
-      }
-    }, 2000);
   };
 
   const revealAll = () => {
@@ -115,26 +103,27 @@ export const useGameState = (category: string) => {
       score: 0,
     }));
     
-    setTimeout(() => {
-      toast({
-        title: "📖 เฉลย!",
-        description: `${gameState.currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ 0 คะแนน`,
-      });
-      
-      if (gameState.currentImageIndex + 1 >= gameState.currentRoundImages.length) {
-        setGameState(prev => ({ ...prev, gameCompleted: true }));
-        toast({
-          title: "🏁 จบเกม!",
-          description: `คะแนนรวม: ${gameState.totalScore} คะแนน จาก 5 คำถาม`,
-        });
-      } else {
-        setTimeout(() => nextQuestion(), 1500);
-      }
-    }, 500);
+    toast({
+      title: "📖 เฉลย!",
+      description: `${gameState.currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ 0 คะแนน`,
+    });
   };
 
   const nextQuestion = () => {
     const nextIndex = gameState.currentImageIndex + 1;
+    
+    if (nextIndex >= gameState.currentRoundImages.length) {
+      setGameState(prev => ({ 
+        ...prev, 
+        gameCompleted: true,
+        questionsAnswered: prev.questionsAnswered + 1,
+      }));
+      toast({
+        title: "🏁 จบเกม!",
+        description: `คะแนนรวม: ${gameState.totalScore} คะแนน จาก 5 คำถาม`,
+      });
+      return;
+    }
     
     setGameState(prev => ({
       ...prev,
@@ -154,6 +143,7 @@ export const useGameState = (category: string) => {
     handleTileClick,
     handleCorrectAnswer,
     revealAll,
+    nextQuestion,
     resetGame: loadImages,
   };
 };

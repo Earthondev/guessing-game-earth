@@ -20,7 +20,7 @@ const GameInfo = ({ currentImage, allRevealed, gameCompleted }: GameInfoProps) =
           <div className="transition-all duration-500 transform">
             {allRevealed ? (
               <div className="animate-scale-in">
-                🎉 เฉลย: {currentImage.answer}
+                🎉 คำตอบ: {currentImage.answer}
               </div>
             ) : (
               <div className="animate-fade-in">
