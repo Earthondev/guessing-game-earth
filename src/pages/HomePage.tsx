@@ -43,7 +43,7 @@ const HomePage = () => {
           }
 
           return {
-            id: category.id,
+            id: category.name, // Use name as ID for routing
             name: category.name,
             displayName: category.display_name,
             description: category.description,
@@ -83,12 +83,19 @@ const HomePage = () => {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6 gap-6">
-            {/* New Logo */}
-            <img 
-              src="/lovable-uploads/80c72ab4-c9fc-465f-9f8a-e53c8affdd27.png" 
-              alt="Game Logo" 
-              className="w-24 h-24 drop-shadow-2xl premium-logo"
-            />
+            {/* Logo with link to YouTube */}
+            <a 
+              href="https://www.youtube.com/@OurUsualday" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="transition-transform hover:scale-110"
+            >
+              <img 
+                src="/lovable-uploads/80c72ab4-c9fc-465f-9f8a-e53c8affdd27.png" 
+                alt="Game Logo" 
+                className="w-32 h-32 drop-shadow-2xl premium-logo cursor-pointer"
+              />
+            </a>
             
             <h1 className="text-4xl md:text-7xl font-orbitron font-bold text-black mb-4 drop-shadow-2xl">
               TILE PUZZLE PLATFORM

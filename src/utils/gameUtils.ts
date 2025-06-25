@@ -17,7 +17,7 @@ export const getCategoryDisplayName = async (category: string): Promise<string> 
 };
 
 export const loadImagesFromSupabase = async (category: string): Promise<ImageData[]> => {
-  // First, get category information
+  // First, get category information by name
   const { data: categoryData } = await supabase
     .from('game_categories')
     .select('*')
@@ -28,7 +28,7 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
     throw new Error(`Category ${category} not found`);
   }
 
-  // Then get images for this category
+  // Then get images for this category using category name
   const { data: imagesData, error } = await supabase
     .from('masked_rider_images')
     .select('*')
@@ -75,12 +75,13 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
     })
   );
 
-  // Filter out any failed image processing - simplified type predicate
+  // Filter out any failed image processing - fix type predicate to match ImageData interface
   const validImages = imagesWithUrls.filter((img): img is ImageData => {
     return img !== null && 
            typeof img.id === 'string' && 
            typeof img.imageUrl === 'string' && 
            typeof img.answer === 'string';
+    // Note: originalImageUrl is optional in ImageData, so we don't check for it
   });
 
   if (validImages.length === 0) {
