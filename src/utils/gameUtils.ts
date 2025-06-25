@@ -75,13 +75,13 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
     })
   );
 
-  // Filter out any failed image processing - fix type predicate to match ImageData interface
+  // Filter out any failed image processing and ensure proper typing
   const validImages = imagesWithUrls.filter((img): img is ImageData => {
     return img !== null && 
            typeof img.id === 'string' && 
            typeof img.imageUrl === 'string' && 
-           typeof img.answer === 'string';
-    // Note: originalImageUrl is optional in ImageData, so we don't check for it
+           typeof img.answer === 'string' &&
+           (img.originalImageUrl === undefined || typeof img.originalImageUrl === 'string');
   });
 
   if (validImages.length === 0) {
