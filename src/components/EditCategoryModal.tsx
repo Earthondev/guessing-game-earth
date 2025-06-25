@@ -66,6 +66,15 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
     }
   };
 
+  const sanitizeFileName = (fileName: string): string => {
+    // Remove special characters and spaces, replace with underscores or hyphens
+    return fileName
+      .toLowerCase()
+      .replace(/[^a-z0-9.-]/g, '_')
+      .replace(/_{2,}/g, '_')
+      .replace(/^_+|_+$/g, '');
+  };
+
   const updateCategory = async () => {
     if (!editData.display_name.trim()) {
       toast({
@@ -90,7 +99,8 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
         }
 
         const timestamp = Date.now();
-        const fileName = `cover_${timestamp}_${selectedFile.name}`;
+        const sanitizedFileName = sanitizeFileName(selectedFile.name);
+        const fileName = `cover_${timestamp}_${sanitizedFileName}`;
 
         const { error: uploadError } = await supabase.storage
           .from('category-covers')

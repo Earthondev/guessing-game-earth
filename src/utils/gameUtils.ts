@@ -75,7 +75,7 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
     })
   );
 
-  // Filter out any failed image processing - fix the type predicate
+  // Filter out any failed image processing - simplified type predicate
   const validImages = imagesWithUrls.filter((img): img is ImageData => {
     return img !== null && 
            typeof img.id === 'string' && 
