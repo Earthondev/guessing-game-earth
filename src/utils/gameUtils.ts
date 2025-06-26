@@ -62,11 +62,18 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
           originalImageUrl = originalUrlData.publicUrl;
         }
         
+        // Parse accepted_answers from JSON, fallback to single answer
+        let acceptedAnswers: string[] = [img.answer];
+        if (img.accepted_answers && Array.isArray(img.accepted_answers)) {
+          acceptedAnswers = img.accepted_answers;
+        }
+        
         return {
           id: img.id,
           imageUrl: croppedUrlData.publicUrl,
           originalImageUrl: originalImageUrl,
-          answer: img.answer
+          answer: img.answer,
+          acceptedAnswers: acceptedAnswers
         };
       } catch (error) {
         console.error('Error processing image:', img.filename, error);
@@ -75,13 +82,14 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
     })
   );
 
-  // Filter out any failed image processing - use any type to avoid type predicate issues
+  // Filter out any failed image processing
   const validImages = imagesWithUrls.filter((img: any): img is ImageData => {
     return img !== null && 
            typeof img.id === 'string' && 
            typeof img.imageUrl === 'string' && 
            typeof img.answer === 'string' &&
-           (img.originalImageUrl === undefined || typeof img.originalImageUrl === 'string');
+           (img.originalImageUrl === undefined || typeof img.originalImageUrl === 'string') &&
+           Array.isArray(img.acceptedAnswers);
   });
 
   if (validImages.length === 0) {

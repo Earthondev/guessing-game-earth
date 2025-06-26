@@ -44,6 +44,7 @@ export type Database = {
       }
       masked_rider_images: {
         Row: {
+          accepted_answers: Json | null
           answer: string
           category: string
           category_id: string | null
@@ -55,6 +56,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          accepted_answers?: Json | null
           answer: string
           category?: string
           category_id?: string | null
@@ -66,6 +68,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          accepted_answers?: Json | null
           answer?: string
           category?: string
           category_id?: string | null

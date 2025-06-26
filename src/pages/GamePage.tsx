@@ -91,6 +91,7 @@ const GamePage = () => {
             onCorrectAnswer={handleCorrectAnswer}
             onRevealAll={revealAll}
             onResetGame={resetGame}
+            acceptedAnswers={gameState.currentImage.acceptedAnswers || [gameState.currentImage.answer]}
           />
         )}
 

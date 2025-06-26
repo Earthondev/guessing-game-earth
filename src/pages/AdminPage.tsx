@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ArrowLeft, Upload, Trash2, Plus, Save, Eye, Image as ImageIcon, Folder } from "lucide-react";
@@ -13,6 +12,7 @@ import { useAuth } from "@/hooks/useAuth";
 import ImageCropper from "@/components/ImageCropper";
 import CategoryManager from "@/components/CategoryManager";
 import { supabase } from "@/integrations/supabase/client";
+import MultiAnswerInput from "@/components/MultiAnswerInput";
 
 interface ImageItem {
   id: string;
@@ -23,6 +23,7 @@ interface ImageItem {
   category: string;
   imageUrl: string;
   originalImageUrl?: string;
+  accepted_answers?: string[];
 }
 
 const AdminPage = () => {
@@ -56,6 +57,7 @@ const AdminPageContent = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [answer, setAnswer] = useState("");
+  const [acceptedAnswers, setAcceptedAnswers] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("masked_rider");
   const [showCropper, setShowCropper] = useState(false);
   const [croppedImage, setCroppedImage] = useState<string>("");
@@ -120,7 +122,8 @@ const AdminPageContent = () => {
           return {
             ...img,
             imageUrl: urlData.publicUrl,
-            originalImageUrl: originalImageUrl
+            originalImageUrl: originalImageUrl,
+            acceptedAnswers: img.accepted_answers || [img.answer]
           };
         })
       );
@@ -164,10 +167,10 @@ const AdminPageContent = () => {
   };
 
   const uploadImage = async () => {
-    if (!selectedFile || !croppedImage || !answer.trim()) {
+    if (!selectedFile || !croppedImage || acceptedAnswers.length === 0) {
       toast({
         title: "กรุณากรอกข้อมูลให้ครบ",
-        description: "เลือกรูปภาพ, ครอปรูป และใส่คำเฉลย",
+        description: "เลือกรูปภาพ, ครอปรูป และใส่คำตอบอย่างน้อย 1 คำ",
         variant: "destructive",
       });
       return;
@@ -196,14 +199,15 @@ const AdminPageContent = () => {
 
       if (croppedUploadError) throw croppedUploadError;
 
-      // Save metadata to database
+      // Save metadata to database with accepted answers
       const { error: dbError } = await supabase
         .from('masked_rider_images')
         .insert({
           filename: selectedFile.name,
           storage_path: croppedFileName,
           original_storage_path: originalFileName,
-          answer: answer.trim(),
+          answer: acceptedAnswers[0], // First answer as primary
+          accepted_answers: acceptedAnswers,
           category: selectedCategory
         });
 
@@ -219,6 +223,7 @@ const AdminPageContent = () => {
       setPreviewUrl("");
       setCroppedImage("");
       setAnswer("");
+      setAcceptedAnswers([]);
       
       // Reload images if current category matches
       if (selectedCategoryView === selectedCategory) {
@@ -353,19 +358,15 @@ const AdminPageContent = () => {
                       />
                     </div>
 
-                    <div>
-                      <Label className="text-black">คำเฉลย</Label>
-                      <Input
-                        value={answer}
-                        onChange={(e) => setAnswer(e.target.value)}
-                        placeholder="ใส่คำเฉลย..."
-                        className="bg-white border-gray-300 text-black"
-                      />
-                    </div>
+                    <MultiAnswerInput
+                      answers={acceptedAnswers}
+                      onChange={setAcceptedAnswers}
+                      label="คำตอบที่ยอมรับได้ (ไทย/อังกฤษ)"
+                    />
 
                     <Button
                       onClick={uploadImage}
-                      disabled={loading || !selectedFile || !croppedImage || !answer.trim()}
+                      disabled={loading || !selectedFile || !croppedImage || acceptedAnswers.length === 0}
                       className="bg-blue-500 hover:bg-blue-600 text-white w-full"
                     >
                       <Save className="w-4 h-4 mr-2" />
@@ -454,6 +455,13 @@ const AdminPageContent = () => {
                             </div>
                             <div className="space-y-2">
                               <p className="font-bold text-black">{image.answer}</p>
+                              <div className="flex flex-wrap gap-1">
+                                {(image.acceptedAnswers || [image.answer]).map((answer, i) => (
+                                  <Badge key={i} variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                                    {answer}
+                                  </Badge>
+                                ))}
+                              </div>
                               <p className="text-xs text-gray-500">
                                 ไฟล์: {image.filename}
                               </p>

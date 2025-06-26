@@ -1,9 +1,9 @@
-
 export interface ImageData {
   id: string;
   imageUrl: string;
   answer: string;
   originalImageUrl?: string;
+  acceptedAnswers?: string[];
 }
 
 export interface GameState {
