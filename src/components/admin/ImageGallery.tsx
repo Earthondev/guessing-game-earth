@@ -37,11 +37,12 @@ const ImageGallery = ({ images, categories, selectedCategoryView, loading, onIma
     if (!confirm(`ต้องการลบรูปภาพ "${image.answer}" หรือไม่?`)) return;
 
     try {
-      // Delete from storage
+      // Delete game image from storage
       await supabase.storage
         .from('masked-rider-images')
         .remove([image.storage_path]);
 
+      // Delete answer image from storage
       if (image.original_storage_path) {
         await supabase.storage
           .from('masked-rider-images')
@@ -120,13 +121,34 @@ const ImageGallery = ({ images, categories, selectedCategoryView, loading, onIma
               {images.map((image) => (
                 <Card key={image.id} className="bg-gray-50 border-gray-300 hover:border-blue-400 transition-colors">
                   <CardContent className="p-4">
-                    <div className="aspect-square mb-3 overflow-hidden rounded-lg bg-gray-200">
-                      <img
-                        src={image.imageUrl}
-                        alt={image.answer}
-                        className="w-full h-full object-cover"
-                      />
+                    <div className="space-y-3 mb-3">
+                      {/* Game Image */}
+                      <div>
+                        <p className="text-xs text-gray-600 mb-1">รูปเล่นเกม</p>
+                        <div className="aspect-square overflow-hidden rounded-lg bg-gray-200">
+                          <img
+                            src={image.imageUrl}
+                            alt={`${image.answer} - เล่นเกม`}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </div>
+                      
+                      {/* Answer Image */}
+                      {image.originalImageUrl && (
+                        <div>
+                          <p className="text-xs text-gray-600 mb-1">รูปเฉลย</p>
+                          <div className="aspect-square overflow-hidden rounded-lg bg-gray-200">
+                            <img
+                              src={image.originalImageUrl}
+                              alt={`${image.answer} - เฉลย`}
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
+                    
                     <div className="space-y-2">
                       <p className="font-bold text-black">{image.answer}</p>
                       <div className="flex flex-wrap gap-1">
@@ -140,17 +162,6 @@ const ImageGallery = ({ images, categories, selectedCategoryView, loading, onIma
                         ไฟล์: {image.filename}
                       </p>
                       <div className="flex gap-2">
-                        {image.originalImageUrl && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(image.originalImageUrl, '_blank')}
-                            className="flex-1 border-gray-400 text-gray-600 hover:bg-gray-100"
-                          >
-                            <Eye className="w-3 h-3 mr-1" />
-                            รูปต้นฉบับ
-                          </Button>
-                        )}
                         <Button
                           size="sm"
                           variant="outline"
