@@ -19,9 +19,9 @@ const CategorySelector = ({ categories, selectedCategoryView, setSelectedCategor
           <SelectTrigger className="bg-white border-gray-300 text-black">
             <SelectValue placeholder="เลือกหมวดหมู่..." />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white border-gray-300 z-50">
             {categories.map((cat) => (
-              <SelectItem key={cat.name} value={cat.name}>
+              <SelectItem key={cat.name} value={cat.name} className="text-black hover:bg-gray-100">
                 {cat.display_name}
               </SelectItem>
             ))}
