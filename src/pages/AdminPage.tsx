@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ArrowLeft, Upload, Trash2, Plus, Save, Eye, Image as ImageIcon, Folder } from "lucide-react";
@@ -7,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import ImageCropper from "@/components/ImageCropper";
@@ -23,7 +25,7 @@ interface ImageItem {
   category: string;
   imageUrl: string;
   originalImageUrl?: string;
-  accepted_answers?: string[];
+  accepted_answers: string[];
 }
 
 const AdminPage = () => {
@@ -119,12 +121,20 @@ const AdminPageContent = () => {
             originalImageUrl = originalUrlData.publicUrl;
           }
 
+          // Properly parse accepted_answers and ensure it's string[]
+          let acceptedAnswersList: string[] = [img.answer];
+          if (img.accepted_answers && Array.isArray(img.accepted_answers)) {
+            acceptedAnswersList = img.accepted_answers.filter((answer: any): answer is string => 
+              typeof answer === 'string'
+            );
+          }
+
           return {
             ...img,
             imageUrl: urlData.publicUrl,
             originalImageUrl: originalImageUrl,
-            acceptedAnswers: img.accepted_answers || [img.answer]
-          };
+            accepted_answers: acceptedAnswersList
+          } as ImageItem;
         })
       );
 
@@ -456,7 +466,7 @@ const AdminPageContent = () => {
                             <div className="space-y-2">
                               <p className="font-bold text-black">{image.answer}</p>
                               <div className="flex flex-wrap gap-1">
-                                {(image.acceptedAnswers || [image.answer]).map((answer, i) => (
+                                {image.accepted_answers.map((answer, i) => (
                                   <Badge key={i} variant="secondary" className="text-xs bg-blue-100 text-blue-800">
                                     {answer}
                                   </Badge>

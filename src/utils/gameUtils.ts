@@ -65,7 +65,10 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
         // Parse accepted_answers from JSON, fallback to single answer
         let acceptedAnswers: string[] = [img.answer];
         if (img.accepted_answers && Array.isArray(img.accepted_answers)) {
-          acceptedAnswers = img.accepted_answers;
+          // Properly filter and type cast to ensure only strings
+          acceptedAnswers = img.accepted_answers.filter((answer: any): answer is string => 
+            typeof answer === 'string'
+          );
         }
         
         return {
