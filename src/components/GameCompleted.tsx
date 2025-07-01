@@ -11,7 +11,7 @@ interface GameCompletedProps {
 }
 
 const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10 }: GameCompletedProps) => {
-  const maxScore = totalQuestions * 25; // คะแนนเต็ม = จำนวนเกม × 25
+  const maxScore = totalQuestions * 25;
   
   const getScoreMessage = (score: number) => {
     const percentage = (score / maxScore) * 100;
@@ -19,6 +19,11 @@ const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10 }: GameCom
     if (percentage >= 60) return "👍 ดีมาก! คุณมีความรู้ในระดับดี";
     if (percentage >= 40) return "😊 พอใช้! ลองเล่นอีกครั้งเพื่อพัฒนา";
     return "💪 ลองใหม่อีกครั้ง! ฝึกฝนแล้วจะเก่งขึ้น";
+  };
+
+  const handleResetClick = () => {
+    console.log('Reset button clicked');
+    onResetGame();
   };
 
   return (
@@ -29,14 +34,14 @@ const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10 }: GameCom
         <p className="text-gray-300 mb-6">{getScoreMessage(totalScore)}</p>
         <div className="flex gap-4 justify-center">
           <Button
-            onClick={onResetGame}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            onClick={handleResetClick}
+            className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3"
           >
             <Shuffle className="w-4 h-4 mr-2" />
-            เล่นใหม่
+            เล่นใหม่ (สุ่มอีกรอบ)
           </Button>
           <Link to="/">
-            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-6 py-3">
               <Home className="w-4 h-4 mr-2" />
               กลับหน้าหลัก
             </Button>

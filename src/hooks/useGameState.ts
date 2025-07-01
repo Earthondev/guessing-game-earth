@@ -48,7 +48,6 @@ export const useGameState = (category: string) => {
   const startNewGame = (imageList: ImageData[]) => {
     if (imageList.length === 0) return;
     
-    // เปลี่ยนจาก 5 เป็น 10 เกม
     const gameImages = selectGameImages(imageList, 10);
     
     setGameState(prev => ({
@@ -64,6 +63,28 @@ export const useGameState = (category: string) => {
       questionsAnswered: 0,
       gameCompleted: false,
     }));
+  };
+
+  const resetGame = async () => {
+    console.log('Resetting game for category:', category);
+    setGameState(prev => ({ ...prev, loading: true }));
+    try {
+      const validImages = await loadImagesFromSupabase(category);
+      startNewGame(validImages);
+      toast({
+        title: "🎮 เริ่มเกมใหม่!",
+        description: "เกมใหม่เริ่มต้นแล้ว ขอให้โชคดี!",
+      });
+    } catch (error) {
+      console.error('Error resetting game:', error);
+      toast({
+        title: "เกิดข้อผิดพลาด",
+        description: "ไม่สามารถเริ่มเกมใหม่ได้",
+        variant: "destructive",
+      });
+    } finally {
+      setGameState(prev => ({ ...prev, loading: false }));
+    }
   };
 
   const handleTileClick = (index: number) => {
@@ -86,7 +107,7 @@ export const useGameState = (category: string) => {
       ...prev,
       allRevealed: true,
       showOriginal: true,
-      totalScore: prev.totalScore + prev.score, // แก้ไขการรวมคะแนนให้ถูกต้อง
+      totalScore: prev.totalScore + prev.score,
     }));
     
     toast({
@@ -113,7 +134,6 @@ export const useGameState = (category: string) => {
   const nextQuestion = () => {
     const nextIndex = gameState.currentImageIndex + 1;
     
-    // เปลี่ยนจาก 5 เป็น 10 เกม
     if (nextIndex >= gameState.currentRoundImages.length) {
       setGameState(prev => ({ 
         ...prev, 
@@ -146,6 +166,6 @@ export const useGameState = (category: string) => {
     handleCorrectAnswer,
     revealAll,
     nextQuestion,
-    resetGame: loadImages,
+    resetGame,
   };
 };
