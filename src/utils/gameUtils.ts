@@ -102,9 +102,21 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
   return validImages;
 };
 
-export const selectGameImages = (imageList: ImageData[], count: number = 5): ImageData[] => {
+// Enhanced random selection with better distribution
+export const selectGameImages = (imageList: ImageData[], count: number = 10): ImageData[] => {
   if (imageList.length === 0) return [];
   
-  const shuffled = [...imageList].sort(() => Math.random() - 0.5);
-  return shuffled.slice(0, Math.min(count, imageList.length));
+  // If we have fewer images than requested, return all shuffled
+  if (imageList.length <= count) {
+    return [...imageList].sort(() => Math.random() - 0.5);
+  }
+  
+  // Better shuffling algorithm (Fisher-Yates)
+  const shuffled = [...imageList];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  return shuffled.slice(0, count);
 };

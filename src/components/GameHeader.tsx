@@ -10,6 +10,7 @@ interface GameHeaderProps {
   score: number;
   gameCompleted: boolean;
   revealedCount: number;
+  totalQuestions?: number;
 }
 
 const GameHeader = ({ 
@@ -18,7 +19,8 @@ const GameHeader = ({
   totalScore, 
   score, 
   gameCompleted,
-  revealedCount 
+  revealedCount,
+  totalQuestions = 10
 }: GameHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-8">
@@ -43,7 +45,7 @@ const GameHeader = ({
             {categoryDisplayName}
           </h2>
           <p className="text-sm text-gray-400">
-            {gameCompleted ? 'เกมจบแล้ว' : `คำถามที่ ${currentImageIndex + 1}/5`} | คะแนนรวม: {totalScore + (gameCompleted ? 0 : score)}
+            {gameCompleted ? 'เกมจบแล้ว' : `คำถามที่ ${currentImageIndex + 1}/${totalQuestions}`} | คะแนนรวม: {totalScore + (gameCompleted ? 0 : score)}
           </p>
         </div>
       </div>

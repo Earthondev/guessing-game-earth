@@ -36,8 +36,15 @@ const GamePage = () => {
       <div className="min-h-screen p-4 flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
         <Card className="bg-gray-900 border-red-500 border-2">
           <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-white">กำลังโหลดรูปภาพ...</p>
+            <div className="mb-6">
+              <img 
+                src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png" 
+                alt="Loading..." 
+                className="w-24 h-24 mx-auto animate-bounce"
+              />
+            </div>
+            <p className="text-white text-lg">กำลังโหลดรูปภาพ...</p>
+            <p className="text-gray-400 text-sm mt-2">กรุณารอสักครู่</p>
           </CardContent>
         </Card>
       </div>
@@ -54,6 +61,7 @@ const GamePage = () => {
           score={gameState.score}
           gameCompleted={gameState.gameCompleted}
           revealedCount={revealedCount}
+          totalQuestions={10}
         />
 
         {gameState.currentImage && (
@@ -68,6 +76,7 @@ const GamePage = () => {
           <GameCompleted
             totalScore={gameState.totalScore}
             onResetGame={resetGame}
+            totalQuestions={10}
           />
         )}
 

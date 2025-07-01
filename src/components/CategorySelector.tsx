@@ -1,6 +1,5 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export interface GameCategory {
   id: string;
@@ -36,7 +35,11 @@ const CategorySelector = ({
           </h2>
         </div>
         <div className="flex justify-center">
-          <div className="w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+          <img 
+            src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png" 
+            alt="Loading..." 
+            className="w-16 h-16 animate-bounce"
+          />
         </div>
       </div>
     );
@@ -64,7 +67,7 @@ const CategorySelector = ({
           เลือกหมวดหมู่เกม
         </h2>
         <p className="text-slate-300">
-          เลือกหมวดหมู่ที่คุณต้องการเล่น
+          คลิกเพื่อเริ่มเล่นเกม 10 รอบทันที!
         </p>
       </div>
 
@@ -72,11 +75,7 @@ const CategorySelector = ({
         {categories.map((category) => (
           <Card
             key={category.id}
-            className={`cursor-pointer transition-all duration-300 hover:scale-105 ${
-              selectedCategory === category.id
-                ? 'border-2 border-green-400 bg-gradient-to-br from-green-400/20 to-transparent'
-                : 'bg-slate-800/50 border-slate-600 hover:border-green-400'
-            }`}
+            className="cursor-pointer transition-all duration-300 hover:scale-105 bg-slate-800/50 border-slate-600 hover:border-green-400"
             onClick={() => onSelectCategory(category.id)}
           >
             <CardContent className="p-4">
@@ -103,17 +102,6 @@ const CategorySelector = ({
           </Card>
         ))}
       </div>
-
-      {selectedCategory && (
-        <div className="text-center animate-fade-in">
-          <Button
-            onClick={onStartGame}
-            className="bg-green-500 hover:bg-green-600 text-white text-lg px-8 py-3 hover:scale-105 transition-all duration-300"
-          >
-            🎮 เริ่มเกม
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

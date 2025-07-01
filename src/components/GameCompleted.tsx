@@ -7,13 +7,17 @@ import { Card, CardContent } from "@/components/ui/card";
 interface GameCompletedProps {
   totalScore: number;
   onResetGame: () => void;
+  totalQuestions?: number;
 }
 
-const GameCompleted = ({ totalScore, onResetGame }: GameCompletedProps) => {
+const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10 }: GameCompletedProps) => {
+  const maxScore = totalQuestions * 25; // คะแนนเต็ม = จำนวนเกม × 25
+  
   const getScoreMessage = (score: number) => {
-    if (score >= 100) return "🌟 ยอดเยี่ยม! คุณรู้จักหมวดหมู่นี้ดีมาก!";
-    if (score >= 75) return "👍 ดีมาก! คุณมีความรู้ในระดับดี";
-    if (score >= 50) return "😊 พอใช้! ลองเล่นอีกครั้งเพื่อพัฒนา";
+    const percentage = (score / maxScore) * 100;
+    if (percentage >= 80) return "🌟 ยอดเยี่ยม! คุณรู้จักหมวดหมู่นี้ดีมาก!";
+    if (percentage >= 60) return "👍 ดีมาก! คุณมีความรู้ในระดับดี";
+    if (percentage >= 40) return "😊 พอใช้! ลองเล่นอีกครั้งเพื่อพัฒนา";
     return "💪 ลองใหม่อีกครั้ง! ฝึกฝนแล้วจะเก่งขึ้น";
   };
 
@@ -21,7 +25,7 @@ const GameCompleted = ({ totalScore, onResetGame }: GameCompletedProps) => {
     <Card className="bg-gray-900 border-green-500 border-2 mb-6">
       <CardContent className="p-8 text-center">
         <h2 className="text-2xl font-bold text-green-400 mb-4">🏁 เกมจบแล้ว!</h2>
-        <p className="text-xl text-white mb-4">คะแนนรวม: {totalScore} / 125 คะแนน</p>
+        <p className="text-xl text-white mb-4">คะแนนรวม: {totalScore} / {maxScore} คะแนน</p>
         <p className="text-gray-300 mb-6">{getScoreMessage(totalScore)}</p>
         <div className="flex gap-4 justify-center">
           <Button

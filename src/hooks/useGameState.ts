@@ -48,7 +48,8 @@ export const useGameState = (category: string) => {
   const startNewGame = (imageList: ImageData[]) => {
     if (imageList.length === 0) return;
     
-    const gameImages = selectGameImages(imageList);
+    // เปลี่ยนจาก 5 เป็น 10 เกม
+    const gameImages = selectGameImages(imageList, 10);
     
     setGameState(prev => ({
       ...prev,
@@ -85,7 +86,7 @@ export const useGameState = (category: string) => {
       ...prev,
       allRevealed: true,
       showOriginal: true,
-      totalScore: prev.totalScore + prev.score,
+      totalScore: prev.totalScore + prev.score, // แก้ไขการรวมคะแนนให้ถูกต้อง
     }));
     
     toast({
@@ -112,6 +113,7 @@ export const useGameState = (category: string) => {
   const nextQuestion = () => {
     const nextIndex = gameState.currentImageIndex + 1;
     
+    // เปลี่ยนจาก 5 เป็น 10 เกม
     if (nextIndex >= gameState.currentRoundImages.length) {
       setGameState(prev => ({ 
         ...prev, 
@@ -120,7 +122,7 @@ export const useGameState = (category: string) => {
       }));
       toast({
         title: "🏁 จบเกม!",
-        description: `คะแนนรวม: ${gameState.totalScore} คะแนน จาก 5 คำถาม`,
+        description: `คะแนนรวม: ${gameState.totalScore} คะแนน จาก 10 คำถาม`,
       });
       return;
     }

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Settings, Shield } from "lucide-react";
@@ -17,6 +17,7 @@ const HomePage = () => {
   const [loading, setLoading] = useState(false);
   const { isAuthenticated, signOut } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadCategories();
@@ -67,10 +68,11 @@ const HomePage = () => {
     }
   };
 
-  const handleStartGame = () => {
-    if (selectedCategory) {
-      window.location.href = `/game?category=${selectedCategory}`;
-    }
+  // เปลี่ยนให้เข้าเกมทันทีเมื่อเลือกหมวดหมู่
+  const handleSelectCategory = (categoryId: string) => {
+    setSelectedCategory(categoryId);
+    // เข้าเกมทันทีโดยไม่ต้องกดปุ่มเริ่ม
+    navigate(`/game?category=${categoryId}`);
   };
 
   const handleAuthSuccess = () => {
@@ -145,8 +147,8 @@ const HomePage = () => {
             <CategorySelector
               categories={categories}
               selectedCategory={selectedCategory}
-              onSelectCategory={setSelectedCategory}
-              onStartGame={handleStartGame}
+              onSelectCategory={handleSelectCategory}
+              onStartGame={() => {}} // ไม่ใช้แล้วเพราะเข้าเกมทันที
               loading={loading}
             />
           </CardContent>
@@ -182,10 +184,10 @@ const HomePage = () => {
             <CardContent className="p-6 text-center">
               <div className="text-3xl mb-4">🎨</div>
               <h3 className="font-orbitron font-bold text-lg mb-2 text-japanese-red-light">
-                ครอปภาพอัจฉริยะ
+                10 เกมต่อรอบ
               </h3>
               <p className="text-red-100">
-                ตัดแต่งภาพให้ได้ความยากที่เหมาะสม
+                เล่น 10 เกมต่อรอบ สุ่มแบบกระจายตัวที่สุด
               </p>
             </CardContent>
           </Card>
