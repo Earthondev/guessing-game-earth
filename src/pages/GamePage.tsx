@@ -30,6 +30,7 @@ const GamePage = () => {
 
   const revealedCount = gameState.revealedTiles.filter(Boolean).length;
   const canGoNext = gameState.allRevealed && gameState.currentImageIndex + 1 < gameState.currentRoundImages.length;
+  const isLastQuestion = gameState.currentImageIndex + 1 >= gameState.currentRoundImages.length;
 
   if (gameState.loading) {
     return (
@@ -90,6 +91,8 @@ const GamePage = () => {
               onTileClick={handleTileClick}
               onNextQuestion={nextQuestion}
               canGoNext={canGoNext}
+              isLastQuestion={isLastQuestion}
+              onResetGame={resetGame}
             />
           </div>
         )}

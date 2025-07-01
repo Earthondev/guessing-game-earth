@@ -3,7 +3,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import TileGrid from "@/components/TileGrid";
 import { ImageData } from "@/types/game";
 import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Home, Shuffle } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface GameDisplayProps {
   currentImage: ImageData;
@@ -13,6 +14,8 @@ interface GameDisplayProps {
   onTileClick: (index: number) => void;
   onNextQuestion?: () => void;
   canGoNext?: boolean;
+  isLastQuestion?: boolean;
+  onResetGame?: () => void;
 }
 
 const GameDisplay = ({ 
@@ -22,7 +25,9 @@ const GameDisplay = ({
   revealedTiles, 
   onTileClick,
   onNextQuestion,
-  canGoNext
+  canGoNext,
+  isLastQuestion,
+  onResetGame
 }: GameDisplayProps) => {
   if (showOriginal && allRevealed) {
     return (
@@ -44,8 +49,8 @@ const GameDisplay = ({
               }}
             />
           </div>
-          {canGoNext && onNextQuestion && (
-            <div className="text-center">
+          <div className="text-center">
+            {canGoNext && onNextQuestion && !isLastQuestion && (
               <Button
                 onClick={onNextQuestion}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -53,8 +58,25 @@ const GameDisplay = ({
                 <ArrowRight className="w-4 h-4 mr-2" />
                 ข้อถัดไป
               </Button>
-            </div>
-          )}
+            )}
+            {isLastQuestion && (
+              <div className="flex gap-4 justify-center">
+                <Button
+                  onClick={onResetGame}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold"
+                >
+                  <Shuffle className="w-4 h-4 mr-2" />
+                  เริ่มใหม่
+                </Button>
+                <Link to="/">
+                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
+                    <Home className="w-4 h-4 mr-2" />
+                    ออกเกม
+                  </Button>
+                </Link>
+              </div>
+            )}
+          </div>
         </CardContent>
       </Card>
     );

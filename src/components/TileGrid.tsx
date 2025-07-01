@@ -34,18 +34,14 @@ const TileGrid = ({ imageUrl, revealedTiles, onTileClick }: TileGridProps) => {
           backgroundColor: isRevealed ? 'transparent' : '#1F2937',
         }}
       >
-        {/* Always show number on all tiles */}
-        <div className={`w-full h-full flex items-center justify-center ${
-          isRevealed && imageLoaded 
-            ? 'bg-black/30 text-white' 
-            : 'bg-gradient-to-br from-rider-black to-rider-black-light'
-        } border border-rider-metal`}>
-          <span className={`font-orbitron font-bold text-lg ${
-            isRevealed && imageLoaded ? 'text-white drop-shadow-lg' : 'text-rider-gold'
-          }`}>
-            {index + 1}
-          </span>
-        </div>
+        {/* Show number only when tile is not revealed */}
+        {!isRevealed && (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-rider-black to-rider-black-light border border-rider-metal">
+            <span className="font-orbitron font-bold text-lg text-rider-gold">
+              {index + 1}
+            </span>
+          </div>
+        )}
         
         {isRevealed && imageLoaded && (
           <div className="w-full h-full animate-tile-reveal absolute inset-0 -z-10" />
