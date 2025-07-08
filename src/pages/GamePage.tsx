@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGameState } from "@/hooks/useGameState";
@@ -9,10 +9,14 @@ import GameCompleted from "@/components/GameCompleted";
 import GameDisplay from "@/components/GameDisplay";
 import GameControls from "@/components/GameControls";
 import GameStats from "@/components/GameStats";
+import YouTubePromotionModal from "@/components/YouTubePromotionModal";
+import YouTubeFloatingButton from "@/components/YouTubeFloatingButton";
 
 const GamePage = () => {
   const [searchParams] = useSearchParams();
   const category = searchParams.get('category') || 'masked_rider';
+  const [showYouTubeModal, setShowYouTubeModal] = useState(false);
+  const [hasShownModal, setHasShownModal] = useState(false);
   
   const {
     gameState,
@@ -27,6 +31,18 @@ const GamePage = () => {
   useEffect(() => {
     loadImages();
   }, [category]);
+
+  // Show YouTube promotion modal when game is completed
+  useEffect(() => {
+    if (gameState.gameCompleted && !hasShownModal) {
+      const timer = setTimeout(() => {
+        setShowYouTubeModal(true);
+        setHasShownModal(true);
+      }, 2000); // Show modal 2 seconds after game completion
+      
+      return () => clearTimeout(timer);
+    }
+  }, [gameState.gameCompleted, hasShownModal]);
 
   const revealedCount = gameState.revealedTiles.filter(Boolean).length;
   const canGoNext = gameState.allRevealed && gameState.currentImageIndex + 1 < gameState.currentRoundImages.length;
@@ -115,6 +131,21 @@ const GamePage = () => {
           />
         )}
       </div>
+
+      {/* YouTube Promotion Modal */}
+      <YouTubePromotionModal
+        isOpen={showYouTubeModal}
+        onClose={() => setShowYouTubeModal(false)}
+        videoId="jWH_kwAqgc8"
+        title="🎉 Amazing job! Ready for more fun?"
+        description="Loved solving puzzles? Check out our YouTube channel for behind-the-scenes content and gaming adventures!"
+      />
+
+      {/* Floating YouTube Button */}
+      <YouTubeFloatingButton 
+        videoId="jWH_kwAqgc8"
+        channelName="Our Usual Day"
+      />
     </div>
   );
 };
