@@ -1,6 +1,6 @@
 import { ExternalLink, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface YouTubeFeedSectionProps {
   videoId: string;
@@ -28,17 +28,17 @@ const YouTubeFeedSection = ({
         </p>
       </div>
 
-      <Card className="bg-white border border-primary/10 shadow-lg hover:shadow-primary/10 transition-all duration-300 overflow-hidden">
-        <div className="md:flex">
+      <Card className="bg-white border border-primary/20 rounded-xl shadow-xl hover:shadow-primary/30 transition-all duration-300 overflow-hidden">
+        <div className="flex flex-col md:flex-row">
           <div className="md:w-1/2">
             <div className="aspect-video relative bg-muted group cursor-pointer" onClick={handleWatchOnYouTube}>
               <img
                 src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
-                alt="YouTube video thumbnail"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                alt={`Thumbnail of YouTube video titled ${title}`}
+                className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-in-out"
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 transition-colors duration-300">
-                <div className="bg-primary/90 text-white rounded-full p-4 group-hover:scale-110 transition-transform duration-300">
+                <div className="bg-primary/80 text-white rounded-full p-4 group-hover:scale-110 group-hover:bg-primary/90 transition-all duration-300 shadow-lg">
                   <Play className="w-8 h-8" />
                 </div>
               </div>
@@ -46,16 +46,16 @@ const YouTubeFeedSection = ({
           </div>
           
           <div className="md:w-1/2 p-6 flex flex-col justify-center">
-            <h3 className="font-heading font-bold text-xl text-foreground mb-4">
+            <h3 className="font-heading font-bold text-xl text-foreground mb-4 leading-tight">
               {title}
             </h3>
-            <p className="text-muted-foreground mb-6 leading-relaxed">
+            <p className="text-muted-foreground mb-6 leading-relaxed text-sm md:text-base">
               {description}
             </p>
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={handleWatchOnYouTube}
-                className="bg-primary hover:bg-primary/90 text-white font-heading"
+                className="bg-primary/90 hover:bg-primary text-white font-heading shadow-md hover:shadow-primary/25 transition-all duration-300"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Watch Now
@@ -63,7 +63,7 @@ const YouTubeFeedSection = ({
               <Button
                 onClick={() => window.open('https://www.youtube.com/@OurUsualday', '_blank')}
                 variant="outline"
-                className="border-primary text-primary hover:bg-primary hover:text-white"
+                className="border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50 transition-all duration-300"
               >
                 Visit Channel
               </Button>
