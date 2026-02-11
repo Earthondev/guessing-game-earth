@@ -1,7 +1,7 @@
-
 import { Link } from "react-router-dom";
 import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import GameTimer from "@/components/GameTimer";
 
 interface GameHeaderProps {
   categoryDisplayName: string;
@@ -11,16 +11,22 @@ interface GameHeaderProps {
   gameCompleted: boolean;
   revealedCount: number;
   totalQuestions?: number;
+  onTimeUp?: () => void;
+  onTick?: () => void;
+  isTimerActive?: boolean;
 }
 
-const GameHeader = ({ 
-  categoryDisplayName, 
-  currentImageIndex, 
-  totalScore, 
-  score, 
+const GameHeader = ({
+  categoryDisplayName,
+  currentImageIndex,
+  totalScore,
+  score,
   gameCompleted,
   revealedCount,
-  totalQuestions = 10
+  totalQuestions = 10,
+  onTimeUp,
+  onTick,
+  isTimerActive = true
 }: GameHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-8">
@@ -49,8 +55,19 @@ const GameHeader = ({
           </p>
         </div>
       </div>
-      
+
       <div className="flex items-center gap-4">
+        {!gameCompleted && (
+          <div className="bg-gray-800 px-3 py-2 rounded-lg border border-gray-600">
+            <GameTimer
+              key={currentImageIndex} // Reset timer on new question
+              isActive={isTimerActive}
+              onTimeUp={onTimeUp}
+              onTick={onTick}
+              duration={60}
+            />
+          </div>
+        )}
         <div className="text-sm text-gray-300 bg-gray-800 px-3 py-2 rounded-lg border border-gray-600">
           คะแนนคำถามนี้: <span className="text-red-400 font-bold">{score}</span>
         </div>

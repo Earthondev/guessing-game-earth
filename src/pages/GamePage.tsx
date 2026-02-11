@@ -1,9 +1,10 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useGameState } from "@/hooks/useGameState";
+import { useGameSounds } from "@/hooks/useGameSounds";
+import { useConfetti } from "@/hooks/useConfetti";
 import GameHeader from "@/components/GameHeader";
 import GameInfo from "@/components/GameInfo";
 import GameCompleted from "@/components/GameCompleted";
@@ -18,12 +19,15 @@ const GamePage = () => {
   const navigate = useNavigate();
   const category = searchParams.get('category');
 
+  const { playFlip, playCorrect, playWrong, playWin, playTick } = useGameSounds();
+  const { fireConfetti, fireFireworks } = useConfetti();
+
   useEffect(() => {
     if (!category) {
       navigate('/');
     }
   }, [category, navigate]);
-
+  // ... (unchanged)
   if (!category) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
@@ -51,6 +55,14 @@ const GamePage = () => {
     loadImages();
   }, [category]);
 
+  // Play win sound and unleash fireworks on game completion
+  useEffect(() => {
+    if (gameState.gameCompleted) {
+      playWin();
+      fireFireworks();
+    }
+  }, [gameState.gameCompleted, playWin, fireFireworks]);
+
   // Show YouTube promotion modal when game is completed
   useEffect(() => {
     if (gameState.gameCompleted && !hasShownModal) {
@@ -62,6 +74,24 @@ const GamePage = () => {
       return () => clearTimeout(timer);
     }
   }, [gameState.gameCompleted, hasShownModal]);
+
+  const onTileClickWithSound = (index: number) => {
+    if (!gameState.revealedTiles[index] && !gameState.allRevealed) {
+      playFlip();
+    }
+    handleTileClick(index);
+  };
+
+  const onCorrectAnswerWithSound = () => {
+    playCorrect();
+    fireConfetti();
+    handleCorrectAnswer();
+  };
+
+  const onRevealAllWithSound = () => {
+    playWrong();
+    revealAll();
+  };
 
   const revealedCount = gameState.revealedTiles.filter(Boolean).length;
   const canGoNext = gameState.allRevealed && gameState.currentImageIndex + 1 < gameState.currentRoundImages.length;
@@ -99,6 +129,9 @@ const GamePage = () => {
           gameCompleted={gameState.gameCompleted}
           revealedCount={revealedCount}
           totalQuestions={10}
+          onTimeUp={onRevealAllWithSound}
+          onTick={playTick}
+          isTimerActive={!gameState.allRevealed && !gameState.gameCompleted && !gameState.loading}
         />
 
         {gameState.currentImage && (
@@ -125,7 +158,7 @@ const GamePage = () => {
               showOriginal={gameState.showOriginal}
               allRevealed={gameState.allRevealed}
               revealedTiles={gameState.revealedTiles}
-              onTileClick={handleTileClick}
+              onTileClick={onTileClickWithSound}
               onNextQuestion={nextQuestion}
               canGoNext={canGoNext}
               isLastQuestion={isLastQuestion}
@@ -137,8 +170,9 @@ const GamePage = () => {
         {gameState.currentImage && !gameState.gameCompleted && !gameState.allRevealed && (
           <GameControls
             allRevealed={gameState.allRevealed}
-            onCorrectAnswer={handleCorrectAnswer}
-            onRevealAll={revealAll}
+            onCorrectAnswer={onCorrectAnswerWithSound}
+            onWrongAnswer={playWrong}
+            onRevealAll={onRevealAllWithSound}
             onResetGame={resetGame}
             acceptedAnswers={gameState.currentImage.acceptedAnswers || [gameState.currentImage.answer]}
           />

@@ -81,7 +81,50 @@ const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10, category 
               }}
             />
           </div>
-          <p className="text-gray-400 text-sm">{getScoreMessage(totalScore)}</p>
+          <p className="text-gray-400 text-sm mb-4">{getScoreMessage(totalScore)}</p>
+
+          {/* Social Share */}
+          <div className="flex justify-center gap-2 mb-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-blue-600 text-blue-500 hover:bg-blue-600 hover:text-white"
+              onClick={() => {
+                const text = `ฉันได้ ${totalScore} คะแนนจากเกมทายภาพหมวด ${category}! มาลองเล่นกันเถอะ`;
+                const url = window.location.href;
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`, '_blank');
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook mr-1"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" /></svg>
+              แชร์
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-sky-500 text-sky-500 hover:bg-sky-500 hover:text-white"
+              onClick={() => {
+                const text = `ฉันได้ ${totalScore} คะแนนจากเกมทายภาพหมวด ${category}! 🎮 #GuessingGame`;
+                const url = window.location.href;
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter mr-1"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" /></svg>
+              ทวีต
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-gray-600 text-gray-400 hover:bg-gray-700 hover:text-white"
+              onClick={() => {
+                const text = `ฉันได้ ${totalScore} คะแนนจากเกมทายภาพหมวด ${category}! มาลองเล่นกันเถอะ ${window.location.href}`;
+                navigator.clipboard.writeText(text);
+                alert("คัดลอกลิงก์เรียบร้อย!");
+              }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy mr-1"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+              คัดลอก
+            </Button>
+          </div>
         </div>
 
         {/* Submit Score Section */}

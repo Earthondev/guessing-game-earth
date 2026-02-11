@@ -5,15 +5,17 @@ import { Clock } from "lucide-react";
 interface GameTimerProps {
   isActive: boolean;
   onTimeUp?: () => void;
+  onTick?: () => void;
   duration?: number; // in seconds
   showMilliseconds?: boolean;
 }
 
-const GameTimer = ({ 
-  isActive, 
-  onTimeUp, 
-  duration = 60, 
-  showMilliseconds = false 
+const GameTimer = ({
+  isActive,
+  onTimeUp,
+  onTick,
+  duration = 60,
+  showMilliseconds = false
 }: GameTimerProps) => {
   const [timeLeft, setTimeLeft] = useState(duration);
 
@@ -30,6 +32,12 @@ const GameTimer = ({
           onTimeUp?.();
           return 0;
         }
+
+        // Tick sound for last 10 seconds
+        if (prev <= 11 && onTick) {
+          onTick();
+        }
+
         return prev - 1;
       });
     }, 1000);

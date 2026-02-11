@@ -13,7 +13,7 @@ export const useGameState = (category: string) => {
     currentRoundImages: [],
     currentImageIndex: 0,
     loading: false,
-    score: 25,
+    score: 100,
     totalScore: 0,
     questionsAnswered: 0,
     gameCompleted: false,
@@ -23,7 +23,7 @@ export const useGameState = (category: string) => {
   const { toast } = useToast();
 
   useEffect(() => {
-    getCategoryDisplayName(category).then(displayName => 
+    getCategoryDisplayName(category).then(displayName =>
       setGameState(prev => ({ ...prev, categoryDisplayName: displayName }))
     );
   }, [category]);
@@ -47,9 +47,9 @@ export const useGameState = (category: string) => {
 
   const startNewGame = (imageList: ImageData[]) => {
     if (imageList.length === 0) return;
-    
+
     const gameImages = selectGameImages(imageList, 10);
-    
+
     setGameState(prev => ({
       ...prev,
       currentRoundImages: gameImages,
@@ -58,7 +58,7 @@ export const useGameState = (category: string) => {
       revealedTiles: Array(25).fill(false),
       allRevealed: false,
       showOriginal: false,
-      score: 25,
+      score: 100,
       totalScore: 0,
       questionsAnswered: 0,
       gameCompleted: false,
@@ -92,11 +92,11 @@ export const useGameState = (category: string) => {
 
     const newRevealed = [...gameState.revealedTiles];
     newRevealed[index] = true;
-    
+
     setGameState(prev => ({
       ...prev,
       revealedTiles: newRevealed,
-      score: Math.max(0, prev.score - 5)
+      score: Math.max(0, prev.score - 4)
     }));
   };
 
@@ -109,7 +109,7 @@ export const useGameState = (category: string) => {
       showOriginal: true,
       totalScore: prev.totalScore + prev.score,
     }));
-    
+
     toast({
       title: "🎉 ถูกต้อง!",
       description: `${gameState.currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ ${gameState.score} คะแนน`,
@@ -124,7 +124,7 @@ export const useGameState = (category: string) => {
       showOriginal: true,
       score: 0,
     }));
-    
+
     toast({
       title: "📖 เฉลย!",
       description: `${gameState.currentImage?.answer || "ไม่พบคำเฉลย"} - ได้ 0 คะแนน`,
@@ -133,10 +133,10 @@ export const useGameState = (category: string) => {
 
   const nextQuestion = () => {
     const nextIndex = gameState.currentImageIndex + 1;
-    
+
     if (nextIndex >= gameState.currentRoundImages.length) {
-      setGameState(prev => ({ 
-        ...prev, 
+      setGameState(prev => ({
+        ...prev,
         gameCompleted: true,
         questionsAnswered: prev.questionsAnswered + 1,
       }));
@@ -146,7 +146,7 @@ export const useGameState = (category: string) => {
       });
       return;
     }
-    
+
     setGameState(prev => ({
       ...prev,
       currentImageIndex: nextIndex,
@@ -154,7 +154,7 @@ export const useGameState = (category: string) => {
       revealedTiles: Array(25).fill(false),
       allRevealed: false,
       showOriginal: false,
-      score: 25,
+      score: 100,
       questionsAnswered: prev.questionsAnswered + 1,
     }));
   };
