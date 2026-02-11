@@ -87,7 +87,7 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
           acceptedAnswers: acceptedAnswers
         };
       } catch (error) {
-        console.error('Error processing image:', img.filename, error);
+        console.error('Error processing image:', img.storage_path, error);
         return null;
       }
     })
