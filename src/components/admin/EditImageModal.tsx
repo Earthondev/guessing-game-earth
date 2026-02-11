@@ -12,7 +12,6 @@ import { Save } from "lucide-react";
 
 interface ImageItem {
   id: string;
-  filename: string;
   answer: string;
   storage_path: string;
   original_storage_path?: string;
@@ -77,10 +76,11 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
       let gameImagePath = image.storage_path;
       let answerImagePath = image.original_storage_path;
       const timestamp = Date.now();
+      const sanitize = (name: string) => name.replace(/[^a-zA-Z0-9._-]/g, '_');
 
       // Upload new game image if selected
       if (newGameImageFile) {
-        const newGameImageFileName = `game_${timestamp}_${newGameImageFile.name}`;
+        const newGameImageFileName = `game_${timestamp}_${sanitize(newGameImageFile.name)}`;
         const { error: gameUploadError } = await supabase.storage
           .from('masked-rider-images')
           .upload(newGameImageFileName, newGameImageFile);
@@ -99,7 +99,7 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
 
       // Upload new answer image if selected
       if (newAnswerImageFile) {
-        const newAnswerImageFileName = `answer_${timestamp}_${newAnswerImageFile.name}`;
+        const newAnswerImageFileName = `answer_${timestamp}_${sanitize(newAnswerImageFile.name)}`;
         const { error: answerUploadError } = await supabase.storage
           .from('masked-rider-images')
           .upload(newAnswerImageFileName, newAnswerImageFile);
@@ -125,7 +125,6 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
           category: selectedCategory,
           storage_path: gameImagePath,
           original_storage_path: answerImagePath,
-          filename: newGameImageFile ? newGameImageFile.name : image.filename
         })
         .eq('id', image.id);
 

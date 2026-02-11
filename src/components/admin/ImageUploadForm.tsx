@@ -133,11 +133,10 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
       console.log('Answer image uploaded successfully:', answerData);
 
       // Save metadata to database
-      console.log('Saving to database:', { filename: gameImageFile.name, storage_path: gameImageFileName, original_storage_path: answerImageFileName, answer: acceptedAnswers[0], category: selectedCategory });
+      console.log('Saving to database:', { storage_path: gameImageFileName, original_storage_path: answerImageFileName, answer: acceptedAnswers[0], category: selectedCategory });
       const { error: dbError } = await supabase
         .from('masked_rider_images')
         .insert({
-          filename: gameImageFile.name,
           storage_path: gameImageFileName, // Game image path
           original_storage_path: answerImageFileName, // Answer image path
           answer: acceptedAnswers[0], // First answer as primary

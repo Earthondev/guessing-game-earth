@@ -12,7 +12,6 @@ import CategoryManager from "@/components/CategoryManager";
 
 interface ImageItem {
   id: string;
-  filename: string;
   answer: string;
   storage_path: string;
   original_storage_path?: string;

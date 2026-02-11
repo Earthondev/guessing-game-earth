@@ -10,7 +10,6 @@ import EditImageModal from "./EditImageModal";
 
 interface ImageItem {
   id: string;
-  filename: string;
   answer: string;
   storage_path: string;
   original_storage_path?: string;
@@ -159,7 +158,7 @@ const ImageGallery = ({ images, categories, selectedCategoryView, loading, onIma
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 font-mono text-ellipsis overflow-hidden whitespace-nowrap">
-                        ไฟล์: {image.filename}
+                        ไฟล์: {image.storage_path}
                       </p>
                       <div className="flex gap-2">
                         <Button

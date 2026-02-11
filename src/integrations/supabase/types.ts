@@ -81,7 +81,7 @@ export type Database = {
           category: string
           category_id: string | null
           created_at: string
-          filename: string
+          filename: string | null
           id: string
           original_storage_path: string | null
           storage_path: string
@@ -93,7 +93,7 @@ export type Database = {
           category?: string
           category_id?: string | null
           created_at?: string
-          filename: string
+          filename?: string | null
           id?: string
           original_storage_path?: string | null
           storage_path: string
@@ -105,7 +105,7 @@ export type Database = {
           category?: string
           category_id?: string | null
           created_at?: string
-          filename?: string
+          filename?: string | null
           id?: string
           original_storage_path?: string | null
           storage_path?: string
