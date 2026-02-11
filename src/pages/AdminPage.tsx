@@ -127,18 +127,24 @@ const AdminPageContent = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-rich-black text-foreground">
       <div className="max-w-6xl mx-auto p-4">
         <AdminHeader />
 
         {/* Tabs for different management sections */}
         <Tabs defaultValue="categories" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 bg-gray-100 border-gray-300">
-            <TabsTrigger value="categories" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-black">
+          <TabsList className="grid w-full grid-cols-2 bg-rich-black-lighter border border-gold/20 p-1 rounded-xl">
+            <TabsTrigger
+              value="categories"
+              className="data-[state=active]:bg-luxury-red data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(255,0,0,0.3)] text-gray-400 hover:text-white transition-all duration-300 rounded-lg py-3 font-heading tracking-wide"
+            >
               <Folder className="w-4 h-4 mr-2" />
               จัดการหมวดหมู่
             </TabsTrigger>
-            <TabsTrigger value="images" className="data-[state=active]:bg-blue-500 data-[state=active]:text-white text-black">
+            <TabsTrigger
+              value="images"
+              className="data-[state=active]:bg-luxury-red data-[state=active]:text-white data-[state=active]:shadow-[0_0_10px_rgba(255,0,0,0.3)] text-gray-400 hover:text-white transition-all duration-300 rounded-lg py-3 font-heading tracking-wide"
+            >
               <ImageIcon className="w-4 h-4 mr-2" />
               จัดการรูปภาพ
             </TabsTrigger>

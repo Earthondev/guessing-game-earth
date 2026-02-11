@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useGameState } from "@/hooks/useGameState";
 import GameHeader from "@/components/GameHeader";
 import GameInfo from "@/components/GameInfo";
@@ -23,7 +24,16 @@ const GamePage = () => {
     }
   }, [category, navigate]);
 
-  if (!category) return null;
+  if (!category) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black text-white">
+        <div className="text-center">
+          <h1 className="text-2xl mb-4">ไม่พบหมวดหมู่</h1>
+          <Button onClick={() => navigate('/')}>กลับสู่หน้าหลัก</Button>
+        </div>
+      </div>
+    );
+  }
   const [showYouTubeModal, setShowYouTubeModal] = useState(false);
   const [hasShownModal, setHasShownModal] = useState(false);
 
@@ -60,17 +70,18 @@ const GamePage = () => {
   if (gameState.loading) {
     return (
       <div className="min-h-screen p-4 flex items-center justify-center bg-gradient-to-br from-gray-900 via-black to-gray-800">
-        <Card className="bg-gray-900 border-red-500 border-2">
+        <Card className="bg-gray-900 border-primary/20 border-2 shadow-2xl animate-pulse">
           <CardContent className="p-12 text-center">
-            <div className="mb-6">
+            <div className="mb-6 relative">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full animate-pulse"></div>
               <img
                 src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png"
                 alt="Loading..."
-                className="w-24 h-24 mx-auto animate-bounce"
+                className="w-24 h-24 mx-auto relative z-10 animate-bounce"
               />
             </div>
-            <p className="text-white text-lg">กำลังโหลดรูปภาพ...</p>
-            <p className="text-gray-400 text-sm mt-2">กรุณารอสักครู่</p>
+            <h2 className="text-2xl font-bold text-white mb-2">กำลังโหลดเกม...</h2>
+            <p className="text-gray-400">เตรียมตัวให้พร้อมสำหรับการทายภาพ!</p>
           </CardContent>
         </Card>
       </div>

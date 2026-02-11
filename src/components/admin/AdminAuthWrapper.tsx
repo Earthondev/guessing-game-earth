@@ -9,15 +9,15 @@ interface AdminAuthWrapperProps {
 
 const AdminAuthWrapper = ({ children }: AdminAuthWrapperProps) => {
   const { isAuthenticated, loading: authLoading } = useAuth();
-  
+
   // Show loading while checking authentication
   if (authLoading) {
     return (
-      <div className="min-h-screen bg-white p-4 flex items-center justify-center">
-        <Card className="bg-white border-gray-300">
+      <div className="min-h-screen bg-rich-black p-4 flex items-center justify-center">
+        <Card className="luxury-card border-gold/20">
           <CardContent className="p-12 text-center">
-            <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-            <p className="text-black">กำลังตรวจสอบสิทธิ์...</p>
+            <div className="w-8 h-8 border-4 border-gold border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gold">กำลังตรวจสอบสิทธิ์...</p>
           </CardContent>
         </Card>
       </div>

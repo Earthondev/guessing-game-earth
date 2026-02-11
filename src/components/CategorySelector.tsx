@@ -19,10 +19,10 @@ interface CategorySelectorProps {
   loading?: boolean;
 }
 
-const CategorySelector = ({ 
-  categories, 
-  selectedCategory, 
-  onSelectCategory, 
+const CategorySelector = ({
+  categories,
+  selectedCategory,
+  onSelectCategory,
   onStartGame,
   loading = false
 }: CategorySelectorProps) => {
@@ -35,9 +35,9 @@ const CategorySelector = ({
           </h2>
         </div>
         <div className="flex justify-center">
-          <img 
-            src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png" 
-            alt="Loading..." 
+          <img
+            src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png"
+            alt="Loading..."
             className="w-16 h-16 animate-bounce"
           />
         </div>
@@ -62,44 +62,43 @@ const CategorySelector = ({
 
   return (
     <div className="space-y-6">
-      <div className="text-center">
-        <h2 className="text-2xl font-heading font-bold text-foreground mb-2">
-          เลือกหมวดหมู่เกม
-        </h2>
-        <p className="text-muted-foreground">
-          คลิกเพื่อเริ่มเล่นเกม 10 รอบทันที!
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {categories.map((category) => (
-          <Card
+          <div
             key={category.id}
-            className="cursor-pointer transition-all duration-300 hover:scale-105 bg-card border border-border hover:border-primary hover:shadow-lg rounded-xl"
             onClick={() => onSelectCategory(category.id)}
+            className="group relative cursor-pointer transform transition-all duration-500 hover:-translate-y-2"
           >
-            <CardContent className="p-6">
-              {category.coverImage ? (
-                <div className="aspect-square mb-4 overflow-hidden rounded-xl shadow-sm">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-luxury-red via-gold to-luxury-red opacity-50 blur opacity-75 transition duration-500 group-hover:duration-200"></div>
+            <div className="relative h-full bg-rich-black border border-white/10 rounded-2xl overflow-hidden shadow-xl">
+              <div className="aspect-[4/3] overflow-hidden">
+                {category.coverImage ? (
                   <img
                     src={category.coverImage}
                     alt={category.displayName}
-                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                   />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-gray-800 to-black flex items-center justify-center text-6xl text-gold/50 group-hover:text-gold/80 transition-colors">
+                    {category.icon}
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-80 group-hover:opacity-60 transition-opacity duration-300"></div>
+              </div>
+
+              <div className="absolute bottom-0 left-0 right-0 p-6 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl filter drop-shadow-lg">{category.icon}</span>
+                  <h3 className="font-heading font-bold text-xl text-white group-hover:text-gold transition-colors drop-shadow-md">
+                    {category.displayName}
+                  </h3>
                 </div>
-              ) : (
-                <div className="aspect-square mb-4 bg-muted rounded-xl flex items-center justify-center text-4xl text-muted-foreground">
-                  {category.icon}
-                </div>
-              )}
-              <h3 className="font-heading font-semibold text-lg mb-2 text-center text-card-foreground">
-                {category.displayName}
-              </h3>
-              <p className="text-sm text-muted-foreground text-center leading-relaxed">
-                {category.description}
-              </p>
-            </CardContent>
-          </Card>
+                <p className="text-sm text-gray-300 line-clamp-2 font-light group-hover:text-white transition-colors">
+                  {category.description}
+                </p>
+              </div>
+            </div>
+          </div>
         ))}
       </div>
     </div>

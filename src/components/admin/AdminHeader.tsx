@@ -8,15 +8,15 @@ const AdminHeader = () => {
     <div className="flex items-center justify-between mb-8">
       <div className="flex items-center gap-4">
         <Link to="/">
-          <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white">
-            <ArrowLeft className="w-4 h-4" />
+          <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-gold text-gold hover:bg-gold hover:text-rich-black">
+            <ArrowLeft className="w-5 h-5" />
           </Button>
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-black">
+          <h1 className="text-3xl font-heading font-bold text-gold drop-shadow-md">
             ระบบจัดการเกม
           </h1>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-400 font-light">
             จัดการหมวดหมู่และรูปภาพสำหรับเกม
           </p>
         </div>

@@ -1,76 +1,92 @@
-# Picture Guessing Game
+# 🎯 Picture Guessing Game (เกมทายภาพปริศนา)
 
-A fun and interactive picture guessing game built with React, Vite, and Tailwind CSS.
+เกมทายภาพสุดสนุกที่ให้คุณทายภาพที่ซ่อนอยู่หลังแผ่นป้าย ยิ่งเปิดน้อย ยิ่งได้คะแนนเยอะ! พัฒนาด้วยเทคโนโลยีเว็บสมัยใหม่ ใช้งานได้สะดวกรวดเร็ว
 
+![Game Screenshot](./public/og-image.png)
 
-## Project info
+## 📋 Changelog
 
-**URL**: https://lovable.dev/projects/c83792cf-bc27-4037-b3e3-2a82ad9e956d
+### v2.0 — Game-First Redesign (11 ก.พ. 2569)
 
-## How can I edit this code?
+- **🏠 ออกแบบหน้าแรกใหม่ทั้งหมด** — เน้นเข้าเล่นเกมทันที ไม่ต้องเลื่อนผ่าน promotion
+  - เอา YouTube Hero Section, YouTube Feed Section, YouTube Floating Button ออก
+  - เอา Feature cards 3 ใบออก (ข้อมูลซ้ำซ้อน)
+  - ย้ายลิงก์ YouTube ไปอยู่ footer เล็กๆ แทน
+  - เปิดเว็บมาเจอหมวดหมู่เกมเลย คลิกเข้าเล่นได้ทันที
+- **🎨 ธีม Dark Luxury สำหรับ Admin Panel** — อัปเดตทุก component ให้เป็นโทนสีดำ-แดง-ทอง
+  - `AdminPage`, `AdminHeader`, `AdminAuthWrapper`
+  - `CategoryManager`, `EditCategoryModal`
+  - `ImageUploadForm`, `ImageGallery`, `EditImageModal`
+  - `CategorySelector` (admin), `MultiAnswerInput`
+- **💎 ปรับ HowToPlayModal** — ใช้ธีม dark luxury แทนพื้นขาวเดิม
 
-There are several ways of editing your application.
+### v1.0 — Initial Release
 
-**Use Lovable**
+- ระบบเกมทายภาพ 10 เกมต่อรอบ พร้อมระบบคะแนน
+- รองรับหลายหมวดหมู่ (Animals, Food, Places, Movies)
+- Admin Dashboard สำหรับจัดการหมวดหมู่และรูปภาพ
+- Responsive Design รองรับทุกอุปกรณ์
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/c83792cf-bc27-4037-b3e3-2a82ad9e956d) and start prompting.
+## ✨ ฟีเจอร์เด่น (Features)
 
-Changes made via Lovable will be committed automatically to this repo.
+- **🎮 หลากหลายหมวดหมู่**: สนุกไปกับหมวดหมู่ภาพที่หลากหลาย เช่น:
+  - 🦁 **Animals** (สัตว์โลกน่ารัก)
+  - 🍔 **Food** (อาหารชวนหิว)
+  - 🗽 **Places** (สถานที่ท่องเที่ยว)
+  - 🎬 **Movies** (ทายชื่อภาพยนตร์)
+- **🏆 ระบบคะแนนท้าทาย**:
+  - เริ่มต้นที่ **25 คะแนน** ต่อข้อ
+  - เปิดแผ่นป้ายดูภาพ **-5 คะแนน** ต่อครั้ง
+  - ทายถูกรับคะแนนที่เหลือสะสมไปเรื่อยๆ ทายผิดไม่หักคะแนนเพิ่ม!
+- **📱 รองรับทุกอุปกรณ์**: เล่นได้ทั้งบนคอมพิวเตอร์ แท็บเล็ต และมือถือ (Responsive Design)
+- **🛠️ ระบบจัดการหลังบ้าน (Admin Dashboard)**: สำหรับเพิ่มหมวดหมู่และอัปโหลดรูปภาพคำถามใหม่ๆ ได้เอง
+- **🎨 ธีม Dark Luxury**: Admin Panel ในโทนสีดำหรูหราพร้อมสีแดงและทอง
 
-**Use your preferred IDE**
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- **Frontend**: React, TypeScript, Vite
+- **Styling**: Tailwind CSS, shadcn/ui
+- **Backend**: Supabase (Database, Auth, Storage)
+- **Icons**: Lucide React
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🚀 การเริ่มต้นโปรเจกต์ (Getting Started)
 
-Follow these steps:
+ต้องการรันโปรเจกต์นี้ในเครื่องของคุณ? ทำตามขั้นตอนง่ายๆ ดังนี้:
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+### 1. Clone โปรเจกต์
+
+```bash
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+cd guessing-game-quest
 ```
 
-**Edit a file directly in GitHub**
+### 2. ติดตั้ง Dependencies
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+```bash
+npm install
+```
 
-**Use GitHub Codespaces**
+### 3. ตั้งค่า Environment Variables
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+สร้างไฟล์ `.env` หรือตรวจสอบไฟล์ `src/integrations/supabase/client.ts` เพื่อใส่ค่า:
+- `SUPABASE_URL`
+- `SUPABASE_PUBLISHABLE_KEY`
 
-## What technologies are used for this project?
+### 4. เริ่มต้น Development Server
 
-This project is built with:
+```bash
+npm run dev
+```
+เปิดบราวเซอร์ไปที่ `http://localhost:8080/`
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 📖 วิธีการเล่น (How to Play)
 
-## How can I deploy this project?
+1. เลือก **หมวดหมู่** ที่ต้องการเล่นจากหน้าแรก
+2. คุณจะพบกับภาพที่ถูกปิดด้วยแผ่นป้าย 25 แผ่น
+3. คลิกที่แผ่นป้ายเพื่อเปิดดูภาพบางส่วน (เสีย 5 คะแนนต่อการเปิด 1 ครั้ง)
+4. พิมพ์คำตอบในช่องว่างแล้วกด **ตอบ**
+5. ถ้าตอบถูกจะได้รับคะแนนและไปข้อถัดไป ถ้าตอบผิดพยายามรวบรวมคำใบ้จากภาพให้มากขึ้น!
 
-Simply open [Lovable](https://lovable.dev/projects/c83792cf-bc27-4037-b3e3-2a82ad9e956d) and click on Share -> Publish.
+---
 
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+**Developed with ❤️ by Earthondev**

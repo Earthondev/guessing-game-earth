@@ -2,13 +2,10 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Settings, Shield } from "lucide-react";
+import { Settings, Shield, HelpCircle, Youtube } from "lucide-react";
 import CategorySelector, { GameCategory } from "@/components/CategorySelector";
 import AuthModal from "@/components/AuthModal";
-import YouTubeHeroSection from "@/components/YouTubeHeroSection";
-import YouTubeFeedSection from "@/components/YouTubeFeedSection";
-import YouTubeFloatingButton from "@/components/YouTubeFloatingButton";
+import HowToPlayModal from "@/components/HowToPlayModal";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [categories, setCategories] = useState<GameCategory[]>([]);
   const [loading, setLoading] = useState(false);
   const { isAuthenticated, signOut } = useAuth();
@@ -47,7 +45,7 @@ const HomePage = () => {
           }
 
           return {
-            id: category.name, // Use name as ID for routing
+            id: category.name,
             name: category.name,
             displayName: category.display_name,
             description: category.description,
@@ -71,10 +69,8 @@ const HomePage = () => {
     }
   };
 
-  // เปลี่ยนให้เข้าเกมทันทีเมื่อเลือกหมวดหมู่
   const handleSelectCategory = (categoryId: string) => {
     setSelectedCategory(categoryId);
-    // เข้าเกมทันทีโดยไม่ต้องกดปุ่มเริ่ม
     navigate(`/game?category=${categoryId}`);
   };
 
@@ -83,144 +79,127 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-6 gap-6">
-            {/* Logo with link to YouTube */}
-            <a 
-              href="https://www.youtube.com/@OurUsualday" 
-              target="_blank" 
+    <div className="min-h-screen bg-background flex flex-col">
+      {/* Compact Top Bar */}
+      <header className="border-b border-white/5 bg-black/20 backdrop-blur-md sticky top-0 z-40">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <a
+              href="https://www.youtube.com/@OurUsualday"
+              target="_blank"
               rel="noopener noreferrer"
-              className="transition-transform hover:scale-110"
+              className="transition-transform hover:scale-110 shrink-0"
             >
-              <img 
-                src="/lovable-uploads/80c72ab4-c9fc-465f-9f8a-e53c8affdd27.png" 
-                alt="Game Logo" 
-                className="w-32 h-32 drop-shadow-2xl premium-logo cursor-pointer"
+              <img
+                src="/lovable-uploads/80c72ab4-c9fc-465f-9f8a-e53c8affdd27.png"
+                alt="Game Logo"
+                className="w-10 h-10 drop-shadow-lg"
               />
             </a>
-            
-            <h1 className="text-4xl md:text-7xl font-heading font-bold text-foreground mb-4 drop-shadow-lg">
-              PICTURE GUESSING GAME
+            <h1 className="text-lg md:text-xl font-heading font-bold text-gold tracking-wide">
+              Picture Guessing Game
             </h1>
           </div>
-          
-          <div className="w-32 h-1 bg-gradient-to-r from-primary to-gold mx-auto mb-6 rounded-full shadow-lg"></div>
-          
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-primary/20 shadow-lg hover:shadow-primary/10 animate-fade-in">
-            ติดตามพวกเราพร้อมเพื่อน ๆ ได้ที่ช่อง YouTube: Our Usual Day เพื่อไม่พลาดกิจกรรมและเกมสนุก ๆ!
-          </p>
-        </div>
 
-        {/* YouTube Hero Section */}
-        <YouTubeHeroSection 
-          videoId="jWH_kwAqgc8"
-          title="Join Our Gaming Adventure!"
-          description="Watch our latest puzzle-solving adventure and gaming highlights"
-        />
-
-        {/* Admin Controls */}
-        <div className="flex justify-end mb-8 gap-4">
-          {isAuthenticated ? (
-            <div className="flex gap-2">
-              <Link to="/admin">
-                <Button className="bg-primary hover:bg-primary/90 text-white shadow-lg hover:shadow-primary/30 transition-all duration-300">
-                  <Settings className="w-4 h-4 mr-2" />
-                  จัดการระบบ
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                onClick={signOut}
-                className="border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
-              >
-                ออกจากระบบ
-              </Button>
-            </div>
-          ) : (
+          <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              onClick={() => setShowAuthModal(true)}
-              className="border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowHowToPlay(true)}
+              className="text-gray-400 hover:text-gold hover:bg-white/5 transition-colors gap-1.5"
             >
-              <Shield className="w-4 h-4 mr-2" />
-              ผู้ดูแลระบบ
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">วิธีเล่น</span>
             </Button>
-          )}
+
+            {isAuthenticated ? (
+              <div className="flex gap-1.5">
+                <Link to="/admin">
+                  <Button size="sm" variant="ghost" className="text-gray-400 hover:text-gold hover:bg-white/5">
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </Link>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={signOut}
+                  className="text-gray-400 hover:text-red-400 hover:bg-white/5 text-xs"
+                >
+                  ออก
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAuthModal(true)}
+                className="text-gray-500 hover:text-gray-300 hover:bg-white/5"
+              >
+                <Shield className="w-4 h-4" />
+              </Button>
+            )}
+          </div>
         </div>
+      </header>
 
-        {/* Game Categories */}
-        <Card className="bg-white/95 border-primary/10 max-w-4xl mx-auto backdrop-blur-sm shadow-lg hover:shadow-primary/10 transition-all duration-300 animate-scale-in">
-          <CardContent className="p-8">
-            <CategorySelector
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onSelectCategory={handleSelectCategory}
-              onStartGame={() => {}} // ไม่ใช้แล้วเพราะเข้าเกมทันที
-              loading={loading}
-            />
-          </CardContent>
-        </Card>
+      {/* Main Game Content — centered vertically */}
+      <main className="flex-1 flex items-center justify-center">
+        <div className="container mx-auto px-4 py-8 max-w-5xl">
+          {/* Minimal Hero */}
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-3 mb-4">
+              <img
+                src="/lovable-uploads/80c72ab4-c9fc-465f-9f8a-e53c8affdd27.png"
+                alt="Game Logo"
+                className="w-16 h-16 md:w-20 md:h-20 drop-shadow-2xl premium-logo"
+              />
+            </div>
+            <h2 className="text-2xl md:text-4xl font-heading font-bold text-foreground mb-2 tracking-wide">
+              เลือกหมวดหมู่แล้วเล่นเลย!
+            </h2>
+            <p className="text-gray-400 font-light text-sm md:text-base max-w-md mx-auto">
+              เปิดแผ่นป้ายทีละใบ ยิ่งเปิดน้อยยิ่งได้คะแนนเยอะ — เล่นได้ 10 เกมต่อรอบ
+            </p>
+          </div>
 
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-          <Card className="bg-white/95 border-primary/10 hover:border-primary/20 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-primary/10 animate-fade-in">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl mb-4">🎯</div>
-              <h3 className="font-heading font-bold text-lg mb-2 text-foreground">
-                หลายหมวดหมู่
-              </h3>
-              <p className="text-muted-foreground">
-                เลือกเล่นได้หลากหลายหมวดหมู่ตามความชอบ
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/95 border-primary/10 hover:border-primary/20 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-primary/10 animate-fade-in">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl mb-4">🎮</div>
-              <h3 className="font-heading font-bold text-lg mb-2 text-foreground">
-                ระบบคะแนน
-              </h3>
-              <p className="text-muted-foreground">
-                เริ่มด้วย 25 คะแนน หักทีละ 5 ต่อการเปิดช่อง
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-white/95 border-primary/10 hover:border-primary/20 transition-all duration-300 backdrop-blur-sm shadow-lg hover:shadow-primary/10 animate-fade-in">
-            <CardContent className="p-6 text-center">
-              <div className="text-3xl mb-4">🎨</div>
-              <h3 className="font-heading font-bold text-lg mb-2 text-foreground">
-                10 เกมต่อรอบ
-              </h3>
-              <p className="text-muted-foreground">
-                เล่น 10 เกมต่อรอบ สุ่มแบบกระจายตัวที่สุด
-              </p>
-            </CardContent>
-          </Card>
+          {/* Category Grid — the star of the page */}
+          <CategorySelector
+            categories={categories}
+            selectedCategory={selectedCategory}
+            onSelectCategory={handleSelectCategory}
+            onStartGame={() => { }}
+            loading={loading}
+          />
         </div>
+      </main>
 
-        {/* YouTube Feed Section */}
-        <YouTubeFeedSection 
-          videoId="jWH_kwAqgc8"
-          title="Behind the Scenes: Creating Your Favorite Puzzle Game"
-          description="Watch how we build challenging puzzles and discover the fun moments behind the game development!"
-        />
-      </div>
+      {/* Minimal Footer */}
+      <footer className="border-t border-white/5 bg-black/20 backdrop-blur-sm">
+        <div className="container mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-gray-500 font-light">
+            เกมทายรูปภาพ — สนุกได้ทุกวัน
+          </p>
+          <a
+            href="https://www.youtube.com/@OurUsualday"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-red-400 transition-colors group"
+          >
+            <Youtube className="w-4 h-4 group-hover:text-red-400 transition-colors" />
+            <span>Our Usual Day</span>
+          </a>
+        </div>
+      </footer>
 
-      <AuthModal 
+      <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={handleAuthSuccess}
       />
-      
-      {/* Floating YouTube Button */}
-      <YouTubeFloatingButton 
-        videoId="jWH_kwAqgc8"
-        channelName="Our Usual Day"
+
+      <HowToPlayModal
+        isOpen={showHowToPlay}
+        onClose={() => setShowHowToPlay(false)}
       />
     </div>
   );

@@ -8,7 +8,7 @@ interface YouTubeFeedSectionProps {
   description?: string;
 }
 
-const YouTubeFeedSection = ({ 
+const YouTubeFeedSection = ({
   videoId,
   title = "Latest from Our YouTube Channel",
   description = "Join us for puzzle-solving adventures and behind-the-scenes content!"
@@ -35,11 +35,11 @@ const YouTubeFeedSection = ({
         </p>
       </div>
 
-      <Card className="bg-white border border-primary/20 rounded-xl shadow-xl hover:shadow-primary/30 transition-all duration-300 overflow-hidden">
+      <Card className="luxury-card border-gold/20 hover:border-gold/40 transition-all duration-300 overflow-hidden">
         <div className="flex flex-col md:flex-row">
           <div className="md:w-1/2">
-            <div 
-              className="aspect-video relative bg-muted group cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2 rounded-lg"
+            <div
+              className="aspect-video relative bg-rich-black group cursor-pointer focus:outline-none focus:ring-2 focus:ring-gold/70 focus:ring-offset-2 rounded-lg"
               onClick={handleWatchOnYouTube}
               onKeyDown={handleKeyPress}
               tabIndex={0}
@@ -50,28 +50,28 @@ const YouTubeFeedSection = ({
                 loading="lazy"
                 src={`https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`}
                 alt={`Thumbnail of YouTube video titled ${title}`}
-                className="w-full h-full object-cover group-hover:scale-[1.03] group-focus:scale-[1.03] transition-transform duration-500 ease-in-out rounded-lg"
+                className="w-full h-full object-cover group-hover:scale-[1.03] group-focus:scale-[1.03] transition-transform duration-500 ease-in-out opacity-80 group-hover:opacity-100"
               />
-              <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 group-focus:bg-black/50 transition-colors duration-300 rounded-lg">
-                <div className="bg-primary/80 text-white rounded-full p-4 group-hover:scale-110 group-hover:bg-primary/90 group-focus:scale-110 group-focus:bg-primary/90 transition-all duration-300 shadow-lg">
-                  <Play className="w-8 h-8" />
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center group-hover:bg-black/50 group-focus:bg-black/50 transition-colors duration-300">
+                <div className="bg-luxury-red text-white rounded-full p-4 group-hover:scale-110 group-hover:bg-luxury-red-vivid group-focus:scale-110 group-focus:bg-luxury-red-vivid transition-all duration-300 shadow-[0_0_15px_rgba(212,175,55,0.4)]">
+                  <Play className="w-8 h-8 fill-current" />
                 </div>
               </div>
             </div>
           </div>
-          
-          <div className="md:w-1/2 p-6 flex flex-col justify-center">
-            <h3 className="font-heading font-bold text-lg md:text-xl text-foreground mb-4 leading-tight">
+
+          <div className="md:w-1/2 p-6 flex flex-col justify-center bg-transparent">
+            <h3 className="font-heading font-bold text-lg md:text-xl text-gold mb-4 leading-tight drop-shadow-sm">
               {title}
             </h3>
-            <p className="text-muted-foreground mb-6 leading-relaxed text-sm md:text-base">
+            <p className="text-gray-300 mb-6 leading-relaxed text-sm md:text-base font-light">
               {description}
             </p>
             <div className="flex flex-col sm:flex-row gap-3">
               <Button
                 onClick={handleWatchOnYouTube}
                 aria-label="Watch video on YouTube"
-                className="bg-primary/90 hover:bg-primary focus:bg-primary text-white font-heading shadow-md hover:shadow-primary/25 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2 transition-all duration-300"
+                className="luxury-button py-2 px-4 text-sm shadow-md hover:shadow-[0_0_15px_rgba(212,175,55,0.3)] transition-all duration-300"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Watch Now
@@ -80,7 +80,7 @@ const YouTubeFeedSection = ({
                 onClick={() => window.open('https://www.youtube.com/@OurUsualday', '_blank')}
                 variant="outline"
                 aria-label="Visit Our Usual Day YouTube channel"
-                className="border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50 focus:bg-primary/5 focus:border-primary/50 focus:outline-none focus:ring-2 focus:ring-primary/70 focus:ring-offset-2 transition-all duration-300"
+                className="border-gold text-gold hover:bg-gold hover:text-rich-black transition-all duration-300"
               >
                 Visit Channel
               </Button>

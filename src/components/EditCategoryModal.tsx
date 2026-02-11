@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 interface GameCategory {
-  id: string;
   name: string;
   display_name: string;
   description: string | null;
@@ -119,7 +118,7 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
           icon: editData.icon,
           cover_image_path: coverImagePath
         })
-        .eq('id', category.id);
+        .eq('name', category.name);
 
       if (dbError) throw dbError;
 
@@ -147,15 +146,15 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-      <Card className="bg-gray-900 border-red-500 border-2 max-w-2xl w-full max-h-[90vh] overflow-auto">
-        <CardHeader className="border-b border-gray-700">
+      <Card className="luxury-card border-gold/20 max-w-2xl w-full max-h-[90vh] overflow-auto">
+        <CardHeader className="border-b border-gold/20">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-red-400">แก้ไขหมวดหมู่</CardTitle>
+            <CardTitle className="text-gold">แก้ไขหมวดหมู่</CardTitle>
             <Button
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="text-gray-400 hover:text-white hover:bg-gray-800"
+              className="text-gray-400 hover:text-white hover:bg-white/10"
             >
               <X className="w-5 h-5" />
             </Button>
@@ -168,9 +167,9 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
                 <Label className="text-gray-300">ชื่อที่แสดง</Label>
                 <Input
                   value={editData.display_name}
-                  onChange={(e) => setEditData({...editData, display_name: e.target.value})}
+                  onChange={(e) => setEditData({ ...editData, display_name: e.target.value })}
                   placeholder="เช่น มาสค์ไรเดอร์"
-                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
+                  className="bg-rich-black-lighter border-gold/20 text-white focus:border-gold/50"
                 />
               </div>
 
@@ -178,9 +177,9 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
                 <Label className="text-gray-300">คำอธิบาย</Label>
                 <Textarea
                   value={editData.description}
-                  onChange={(e) => setEditData({...editData, description: e.target.value})}
+                  onChange={(e) => setEditData({ ...editData, description: e.target.value })}
                   placeholder="คำอธิบายหมวดหมู่..."
-                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
+                  className="bg-rich-black-lighter border-gold/20 text-white focus:border-gold/50"
                 />
               </div>
 
@@ -188,9 +187,9 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
                 <Label className="text-gray-300">ไอคอน</Label>
                 <Input
                   value={editData.icon}
-                  onChange={(e) => setEditData({...editData, icon: e.target.value})}
+                  onChange={(e) => setEditData({ ...editData, icon: e.target.value })}
                   placeholder="🎮"
-                  className="bg-gray-800 border-gray-600 text-white focus:border-red-500"
+                  className="bg-rich-black-lighter border-gold/20 text-white focus:border-gold/50"
                 />
               </div>
             </div>
@@ -202,18 +201,19 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
                   type="file"
                   accept="image/*"
                   onChange={handleFileSelect}
-                  className="cursor-pointer bg-gray-800 border-gray-600 text-white file:bg-red-600 file:border-0 file:text-white"
+                  className="cursor-pointer bg-rich-black-lighter border-gold/20 text-white file:bg-luxury-red file:border-0 file:text-white file:mr-4 file:px-4 file:py-2 file:rounded-full file:text-sm file:font-semibold hover:file:bg-luxury-red-vivid transition-colors"
+                  style={{ height: 'auto', padding: '0.5rem' }}
                 />
               </div>
 
               {previewUrl && (
                 <div>
                   <Label className="text-gray-300">ตัวอย่างรูปปก</Label>
-                  <div className="border border-gray-600 rounded-lg p-4 bg-gray-800">
+                  <div className="border border-gold/20 rounded-lg p-4 bg-rich-black-lighter">
                     <img
                       src={previewUrl}
                       alt="Cover preview"
-                      className="w-full max-w-xs mx-auto rounded-lg"
+                      className="w-full max-w-xs mx-auto rounded-lg border border-white/10"
                     />
                   </div>
                 </div>
@@ -222,7 +222,7 @@ const EditCategoryModal = ({ category, isOpen, onClose, onUpdate }: EditCategory
               <Button
                 onClick={updateCategory}
                 disabled={loading}
-                className="w-full bg-red-600 hover:bg-red-700 text-white"
+                className="w-full luxury-button mt-4"
               >
                 <Save className="w-4 h-4 mr-2" />
                 {loading ? "กำลังอัปเดต..." : "อัปเดตหมวดหมู่"}

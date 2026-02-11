@@ -154,23 +154,23 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto bg-white">
+      <DialogContent className="luxury-card border-gold/20 max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-black">แก้ไขรูปภาพ</DialogTitle>
+          <DialogTitle className="text-gold">แก้ไขรูปภาพ</DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="space-y-4">
               <div>
-                <Label className="text-black">หมวดหมู่</Label>
+                <Label className="text-gray-300">หมวดหมู่</Label>
                 <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                  <SelectTrigger className="bg-white border-gray-300 text-black">
+                  <SelectTrigger className="bg-rich-black-lighter border-gold/20 text-white hover:border-gold/40 transition-colors">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-300 z-50">
+                  <SelectContent className="bg-rich-black border-gold/20 z-50">
                     {categories.map((cat) => (
-                      <SelectItem key={cat.name} value={cat.name} className="text-black hover:bg-gray-100">
+                      <SelectItem key={cat.name} value={cat.name} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
                         {cat.display_name}
                       </SelectItem>
                     ))}
@@ -179,23 +179,25 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
               </div>
 
               <div>
-                <Label className="text-black">รูปเล่นเกมใหม่ (1:1)</Label>
+                <Label className="text-gray-300">รูปเล่นเกมใหม่ (1:1)</Label>
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleGameImageSelect}
-                  className="cursor-pointer bg-white border-gray-300 text-black"
+                  className="cursor-pointer bg-rich-black-lighter border-gold/20 text-white file:bg-luxury-red file:border-0 file:text-white file:mr-4 file:px-4 file:py-2 file:rounded-full file:text-sm file:font-semibold hover:file:bg-luxury-red-vivid transition-colors"
+                  style={{ height: 'auto', padding: '0.5rem' }}
                 />
                 <p className="text-xs text-gray-500 mt-1">เว้นว่างไว้หากต้องการใช้รูปเดิม</p>
               </div>
 
               <div>
-                <Label className="text-black">รูปเฉลยใหม่ (รูปเต็ม)</Label>
+                <Label className="text-gray-300">รูปเฉลยใหม่ (รูปเต็ม)</Label>
                 <Input
                   type="file"
                   accept="image/*"
                   onChange={handleAnswerImageSelect}
-                  className="cursor-pointer bg-white border-gray-300 text-black"
+                  className="cursor-pointer bg-rich-black-lighter border-gold/20 text-white file:bg-luxury-red file:border-0 file:text-white file:mr-4 file:px-4 file:py-2 file:rounded-full file:text-sm file:font-semibold hover:file:bg-luxury-red-vivid transition-colors"
+                  style={{ height: 'auto', padding: '0.5rem' }}
                 />
                 <p className="text-xs text-gray-500 mt-1">เว้นว่างไว้หากต้องการใช้รูปเดิม</p>
               </div>
@@ -209,8 +211,8 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
 
             <div className="space-y-4">
               <div>
-                <Label className="text-black">รูปเล่นเกมปัจจุบัน</Label>
-                <div className="border rounded-lg overflow-hidden bg-gray-50">
+                <Label className="text-gray-300">รูปเล่นเกมปัจจุบัน</Label>
+                <div className="border border-gold/20 rounded-lg overflow-hidden bg-rich-black-lighter">
                   <img
                     src={gameImagePreview || image.imageUrl}
                     alt="Current game image"
@@ -220,8 +222,8 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
               </div>
 
               <div>
-                <Label className="text-black">รูปเฉลยปัจจุบัน</Label>
-                <div className="border rounded-lg overflow-hidden bg-gray-50">
+                <Label className="text-gray-300">รูปเฉลยปัจจุบัน</Label>
+                <div className="border border-gold/20 rounded-lg overflow-hidden bg-rich-black-lighter">
                   <img
                     src={answerImagePreview || image.originalImageUrl || image.imageUrl}
                     alt="Current answer image"
@@ -233,13 +235,13 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
           </div>
 
           <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={onClose} className="border-gray-400 text-gray-600">
+            <Button variant="outline" onClick={onClose} className="border-gold/50 text-gold hover:bg-gold/10">
               ยกเลิก
             </Button>
             <Button
               onClick={handleUpdate}
               disabled={loading || acceptedAnswers.length === 0}
-              className="bg-blue-500 hover:bg-blue-600 text-white"
+              className="luxury-button"
             >
               <Save className="w-4 h-4 mr-2" />
               {loading ? "กำลังบันทึก..." : "บันทึก"}

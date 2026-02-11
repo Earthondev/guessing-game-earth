@@ -132,9 +132,9 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
   };
 
   return (
-    <Card className="bg-white border-gray-300 mb-8">
+    <Card className="luxury-card border-gold/20 mb-8">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-black">
+        <CardTitle className="flex items-center gap-2 text-gold">
           <Plus className="w-5 h-5" />
           เพิ่มรูปภาพใหม่
         </CardTitle>
@@ -143,14 +143,14 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-4">
             <div>
-              <Label className="text-black">หมวดหมู่</Label>
+              <Label className="text-gray-300">หมวดหมู่</Label>
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="bg-white border-gray-300 text-black">
+                <SelectTrigger className="bg-rich-black-lighter border-gold/20 text-white hover:border-gold/40 transition-colors">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-white border-gray-300 z-50">
+                <SelectContent className="bg-rich-black border-gold/20 z-50">
                   {categories.map((cat) => (
-                    <SelectItem key={cat.name} value={cat.name} className="text-black hover:bg-gray-100">
+                    <SelectItem key={cat.name} value={cat.name} className="text-white hover:bg-white/10 focus:bg-white/10 cursor-pointer">
                       {cat.display_name}
                     </SelectItem>
                   ))}
@@ -159,23 +159,25 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
             </div>
 
             <div>
-              <Label className="text-black">รูปสำหรับเล่นเกม (1:1)</Label>
+              <Label className="text-gray-300">รูปสำหรับเล่นเกม (1:1)</Label>
               <Input
                 type="file"
                 accept="image/*"
                 onChange={handleGameImageSelect}
-                className="cursor-pointer bg-white border-gray-300 text-black"
+                className="cursor-pointer bg-rich-black-lighter border-gold/20 text-white file:bg-luxury-red file:border-0 file:text-white file:mr-4 file:px-4 file:py-2 file:rounded-full file:text-sm file:font-semibold hover:file:bg-luxury-red-vivid transition-colors"
+                style={{ height: 'auto', padding: '0.5rem' }}
               />
               <p className="text-xs text-gray-500 mt-1">รูปที่ครอปเป็นสี่เหลี่ยมจัตุรัส</p>
             </div>
 
             <div>
-              <Label className="text-black">รูปเฉลย (รูปเต็ม)</Label>
+              <Label className="text-gray-300">รูปเฉลย (รูปเต็ม)</Label>
               <Input
                 type="file"
                 accept="image/*"
                 onChange={handleAnswerImageSelect}
-                className="cursor-pointer bg-white border-gray-300 text-black"
+                className="cursor-pointer bg-rich-black-lighter border-gold/20 text-white file:bg-luxury-red file:border-0 file:text-white file:mr-4 file:px-4 file:py-2 file:rounded-full file:text-sm file:font-semibold hover:file:bg-luxury-red-vivid transition-colors"
+                style={{ height: 'auto', padding: '0.5rem' }}
               />
               <p className="text-xs text-gray-500 mt-1">รูปต้นฉบับสำหรับแสดงเฉลย</p>
             </div>
@@ -189,7 +191,7 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
             <Button
               onClick={uploadImage}
               disabled={loading || !gameImageFile || !answerImageFile || acceptedAnswers.length === 0}
-              className="bg-blue-500 hover:bg-blue-600 text-white w-full"
+              className="luxury-button w-full mt-4"
             >
               <Save className="w-4 h-4 mr-2" />
               {loading ? "กำลังบันทึก..." : "บันทึกรูปภาพ"}
@@ -199,9 +201,9 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
           <div className="space-y-4">
             {gameImagePreview && (
               <div>
-                <Label className="text-black">ตัวอย่างรูปเล่นเกม</Label>
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="w-48 h-48 mx-auto border border-gray-300 rounded-lg overflow-hidden">
+                <Label className="text-gray-300">ตัวอย่างรูปเล่นเกม</Label>
+                <div className="border border-gold/20 rounded-lg p-4 bg-rich-black-lighter">
+                  <div className="w-48 h-48 mx-auto border border-white/10 rounded-lg overflow-hidden">
                     <img
                       src={gameImagePreview}
                       alt="Game image preview"
@@ -216,9 +218,9 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
           <div className="space-y-4">
             {answerImagePreview && (
               <div>
-                <Label className="text-black">ตัวอย่างรูปเฉลย</Label>
-                <div className="border rounded-lg p-4 bg-gray-50">
-                  <div className="w-48 h-auto mx-auto border border-gray-300 rounded-lg overflow-hidden">
+                <Label className="text-gray-300">ตัวอย่างรูปเฉลย</Label>
+                <div className="border border-gold/20 rounded-lg p-4 bg-rich-black-lighter">
+                  <div className="w-48 h-auto mx-auto border border-white/10 rounded-lg overflow-hidden">
                     <img
                       src={answerImagePreview}
                       alt="Answer image preview"

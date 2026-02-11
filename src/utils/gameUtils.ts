@@ -9,7 +9,7 @@ export const getCategoryDisplayName = async (category: string): Promise<string> 
       .select('display_name')
       .eq('name', category)
       .maybeSingle();
-    
+
     return data?.display_name || 'ไม่ทราบหมวดหมู่';
   } catch {
     return 'ไม่ทราบหมวดหมู่';
@@ -48,32 +48,40 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
     imagesData.map(async (img) => {
       try {
         // Get cropped image URL
-        const { data: croppedUrlData } = supabase.storage
-          .from('masked-rider-images')
-          .getPublicUrl(img.storage_path);
-        
-        let originalImageUrl = croppedUrlData.publicUrl;
-        
+        let croppedUrl = img.storage_path;
+        if (!img.storage_path.startsWith('http')) {
+          const { data } = supabase.storage
+            .from('masked-rider-images')
+            .getPublicUrl(img.storage_path);
+          croppedUrl = data.publicUrl;
+        }
+
+        let originalImageUrl = croppedUrl;
+
         // Get original image URL if exists
         if (img.original_storage_path) {
-          const { data: originalUrlData } = supabase.storage
-            .from('masked-rider-images')
-            .getPublicUrl(img.original_storage_path);
-          originalImageUrl = originalUrlData.publicUrl;
+          if (img.original_storage_path.startsWith('http')) {
+            originalImageUrl = img.original_storage_path;
+          } else {
+            const { data } = supabase.storage
+              .from('masked-rider-images')
+              .getPublicUrl(img.original_storage_path);
+            originalImageUrl = data.publicUrl;
+          }
         }
-        
+
         // Parse accepted_answers from JSON, fallback to single answer
         let acceptedAnswers: string[] = [img.answer];
         if (img.accepted_answers && Array.isArray(img.accepted_answers)) {
           // Properly filter and type cast to ensure only strings
-          acceptedAnswers = img.accepted_answers.filter((answer: any): answer is string => 
+          acceptedAnswers = img.accepted_answers.filter((answer: any): answer is string =>
             typeof answer === 'string'
           );
         }
-        
+
         return {
           id: img.id,
-          imageUrl: croppedUrlData.publicUrl,
+          imageUrl: croppedUrl,
           originalImageUrl: originalImageUrl,
           answer: img.answer,
           acceptedAnswers: acceptedAnswers
@@ -87,12 +95,12 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
 
   // Filter out any failed image processing
   const validImages = imagesWithUrls.filter((img: any): img is ImageData => {
-    return img !== null && 
-           typeof img.id === 'string' && 
-           typeof img.imageUrl === 'string' && 
-           typeof img.answer === 'string' &&
-           (img.originalImageUrl === undefined || typeof img.originalImageUrl === 'string') &&
-           Array.isArray(img.acceptedAnswers);
+    return img !== null &&
+      typeof img.id === 'string' &&
+      typeof img.imageUrl === 'string' &&
+      typeof img.answer === 'string' &&
+      (img.originalImageUrl === undefined || typeof img.originalImageUrl === 'string') &&
+      Array.isArray(img.acceptedAnswers);
   });
 
   if (validImages.length === 0) {
@@ -105,18 +113,18 @@ export const loadImagesFromSupabase = async (category: string): Promise<ImageDat
 // Enhanced random selection with better distribution
 export const selectGameImages = (imageList: ImageData[], count: number = 10): ImageData[] => {
   if (imageList.length === 0) return [];
-  
+
   // If we have fewer images than requested, return all shuffled
   if (imageList.length <= count) {
     return [...imageList].sort(() => Math.random() - 0.5);
   }
-  
+
   // Better shuffling algorithm (Fisher-Yates)
   const shuffled = [...imageList];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  
+
   return shuffled.slice(0, count);
 };

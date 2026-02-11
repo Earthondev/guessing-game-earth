@@ -24,43 +24,60 @@ export default {
 				'heading': ['Montserrat', 'sans-serif'],
 			},
 			colors: {
-				background: '#F5F5F5',
-				foreground: '#1F2937',
-				border: '#E5E7EB',
-				input: '#FFFFFF',
-				ring: '#3B82F6',
+				background: '#0A0A0A', // rich-black
+				foreground: '#FFFFFF',
+				border: '#2A2A2A',
+				input: '#2A2A2A',
+				ring: '#D4AF37', // gold
 				primary: {
-					DEFAULT: '#3B82F6',
+					DEFAULT: '#8B0000', // luxury-red
 					foreground: '#FFFFFF'
 				},
 				secondary: {
-					DEFAULT: '#E5E7EB',
-					foreground: '#1F2937'
+					DEFAULT: '#2A2A2A',
+					foreground: '#FFFFFF'
 				},
 				destructive: {
 					DEFAULT: '#EF4444',
 					foreground: '#FFFFFF'
 				},
 				muted: {
-					DEFAULT: '#E5E7EB',
-					foreground: '#6B7280'
+					DEFAULT: '#2A2A2A',
+					foreground: '#A3A3A3'
 				},
 				accent: {
-					DEFAULT: '#D946EF',
-					foreground: '#FFFFFF'
+					DEFAULT: '#D4AF37', // gold
+					foreground: '#0A0A0A'
 				},
 				popover: {
-					DEFAULT: '#FFFFFF',
-					foreground: '#1F2937'
+					DEFAULT: '#1A1A1A',
+					foreground: '#FFFFFF'
 				},
 				card: {
-					DEFAULT: '#FFFFFF',
-					foreground: '#1F2937'
+					DEFAULT: '#1A1A1A',
+					foreground: '#FFFFFF'
 				},
 				gold: {
-					DEFAULT: '#FACC15',
-					light: '#FDE047',
-					dark: '#EAB308'
+					DEFAULT: '#D4AF37', // Metallic Gold
+					light: '#F4C430',
+					dark: '#AA8C2C',
+					shimmer: '#FFD700'
+				},
+				silver: {
+					DEFAULT: '#C0C0C0',
+					light: '#E8E8E8',
+					dark: '#A9A9A9'
+				},
+				'luxury-red': {
+					DEFAULT: '#8B0000', // Dark Red
+					light: '#A52A2A',
+					dark: '#580000',
+					vivid: '#C41E3A'
+				},
+				'rich-black': {
+					DEFAULT: '#0A0A0A',
+					light: '#1A1A1A',
+					lighter: '#2A2A2A'
 				},
 				// Modern neutral colors
 				neutral: {

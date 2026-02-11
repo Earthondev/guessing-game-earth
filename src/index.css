@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,33 +9,37 @@
 
 @layer base {
   :root {
-    --background: 245 245 245;
-    --foreground: 31 41 55;
+    --background: 10 10 10;
+    /* rich-black */
+    --foreground: 255 255 255;
 
-    --card: 255 255 255;
-    --card-foreground: 31 41 55;
+    --card: 26 26 26;
+    /* rich-black-light */
+    --card-foreground: 255 255 255;
 
-    --popover: 255 255 255;
-    --popover-foreground: 31 41 55;
+    --popover: 26 26 26;
+    --popover-foreground: 255 255 255;
 
-    --primary: 59 130 246;
+    --primary: 139 0 0;
+    /* luxury-red */
     --primary-foreground: 255 255 255;
 
-    --secondary: 229 231 235;
-    --secondary-foreground: 31 41 55;
+    --secondary: 42 42 42;
+    --secondary-foreground: 255 255 255;
 
-    --muted: 229 231 235;
-    --muted-foreground: 107 114 128;
+    --muted: 42 42 42;
+    --muted-foreground: 163 163 163;
 
-    --accent: 217 70 239;
-    --accent-foreground: 255 255 255;
+    --accent: 212 175 55;
+    /* gold */
+    --accent-foreground: 10 10 10;
 
-    --destructive: 239 68 68;
+    --destructive: 127 29 29;
     --destructive-foreground: 255 255 255;
 
-    --border: 229 231 235;
-    --input: 255 255 255;
-    --ring: 59 130 246;
+    --border: 42 42 42;
+    --input: 42 42 42;
+    --ring: 212 175 55;
 
     --radius: 12px;
   }
@@ -47,14 +50,16 @@
     @apply border-border;
   }
 
+  /* Luxury Red Theme Base */
   body {
-    @apply bg-background text-foreground font-sans;
-    background: 
-      radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(217, 70, 239, 0.08) 0%, transparent 50%),
-      linear-gradient(135deg, #F5F5F5 0%, #E5E7EB 30%, #D1D5DB 70%, #F5F5F5 100%);
+    @apply bg-rich-black text-white font-sans;
+    background:
+      radial-gradient(circle at 15% 50%, rgba(139, 0, 0, 0.4) 0%, transparent 50%),
+      radial-gradient(circle at 85% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+      linear-gradient(to bottom, #0A0A0A 0%, #1A1110 100%);
     min-height: 100vh;
     position: relative;
+    overflow-x: hidden;
   }
 
   body::before {
@@ -64,178 +69,100 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
-      repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(59,130,246,0.02) 35px, rgba(59,130,246,0.02) 36px),
-      repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(217,70,239,0.02) 35px, rgba(217,70,239,0.02) 36px);
+    background-image:
+      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
   }
 }
 
 @layer components {
-  .premium-gradient {
-    background: linear-gradient(135deg, #3B82F6 0%, #D946EF 50%, #FACC15 100%);
-  }
-  
-  .premium-text-glow {
-    text-shadow: 
-      0 2px 4px rgba(59, 130, 246, 0.3),
-      0 4px 8px rgba(217, 70, 239, 0.2);
-  }
-  
-  .tile-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 3px;
-    aspect-ratio: 1;
-    max-width: 500px;
-    margin: 0 auto;
-    border: 3px solid rgba(59, 130, 246, 0.3);
-    border-radius: 16px;
-    padding: 8px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(229, 231, 235, 0.7));
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.1),
-      inset 0 2px 0 rgba(59, 130, 246, 0.1);
-  }
-  
-  .tile {
-    aspect-ratio: 1;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    border: 2px solid #E5E7EB;
-    border-radius: 12px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    background: linear-gradient(145deg, #FFFFFF, #F9FAFB);
-  }
-  
-  .tile:hover {
-    border-color: #3B82F6;
-    transform: scale(1.05);
-    box-shadow: 
-      0 8px 25px rgba(59, 130, 246, 0.3),
-      0 4px 12px rgba(0, 0, 0, 0.1);
-  }
-  
-  .tile.revealed {
-    border-color: #D946EF;
-    box-shadow: 
-      0 8px 20px rgba(217, 70, 239, 0.3),
-      0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  
-  .hero-button {
-    @apply relative overflow-hidden font-bold py-4 px-8 rounded-xl text-white font-heading;
-    background: linear-gradient(135deg, #3B82F6 0%, #D946EF 50%, #FACC15 100%);
-    border: 2px solid rgba(59, 130, 246, 0.3);
-    box-shadow: 
-      0 12px 30px rgba(59, 130, 246, 0.3),
-      0 6px 12px rgba(0, 0, 0, 0.1),
-      inset 0 2px 0 rgba(255, 255, 255, 0.2);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
+
+  /* Luxury Gradients */
+  .luxury-gradient-text {
+    background: linear-gradient(to right, #F4C430, #FFD700, #F4C430);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
   }
 
-  .hero-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transition: left 0.6s;
+  /* Luxury Card */
+  .luxury-card {
+    @apply relative border border-white/10 rounded-xl backdrop-blur-md;
+    background: linear-gradient(145deg, rgba(30, 0, 0, 0.8), rgba(10, 0, 0, 0.9));
+    box-shadow:
+      0 10px 30px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1),
+      0 0 20px rgba(139, 0, 0, 0.2);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  .hero-button:hover::before {
-    left: 100%;
-  }
-  
-  .hero-button:hover {
-    transform: translateY(-3px) scale(1.02);
-    box-shadow: 
-      0 16px 40px rgba(59, 130, 246, 0.4),
-      0 8px 16px rgba(0, 0, 0, 0.15),
-      0 0 40px rgba(217, 70, 239, 0.2),
-      inset 0 2px 0 rgba(255, 255, 255, 0.3);
+  .luxury-card:hover {
+    border-color: rgba(212, 175, 55, 0.4);
+    box-shadow:
+      0 20px 40px rgba(0, 0, 0, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 0 30px rgba(139, 0, 0, 0.3);
+    transform: translateY(-5px);
   }
 
-  .hero-button:active {
-    transform: translateY(-1px) scale(0.98);
-  }
-  
-  .admin-card {
-    @apply relative backdrop-blur-sm border rounded-xl p-8;
-    background: linear-gradient(145deg, 
-      rgba(255, 255, 255, 0.9) 0%, 
-      rgba(249, 250, 251, 0.8) 50%, 
-      rgba(255, 255, 255, 0.9) 100%);
-    border: 1px solid rgba(59, 130, 246, 0.2);
-    box-shadow: 
-      0 20px 40px rgba(0, 0, 0, 0.1),
-      0 8px 20px rgba(0, 0, 0, 0.05),
-      inset 0 2px 0 rgba(59, 130, 246, 0.1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .admin-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), rgba(217, 70, 239, 0.3), transparent);
-  }
-  
-  .admin-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 
-      0 25px 50px rgba(0, 0, 0, 0.15),
-      0 12px 24px rgba(0, 0, 0, 0.08),
-      0 0 40px rgba(59, 130, 246, 0.2),
-      inset 0 2px 0 rgba(59, 130, 246, 0.15);
-    border-color: rgba(59, 130, 246, 0.3);
-  }
-
-  .premium-logo {
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1))
-            drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
+  /* Luxury Button */
+  .luxury-button {
+    @apply relative overflow-hidden font-bold py-3 px-8 rounded-lg text-white font-heading uppercase tracking-wider;
+    background: linear-gradient(to bottom, #8B0000 0%, #580000 100%);
+    border: 1px solid #A52A2A;
+    box-shadow:
+      0 4px 6px rgba(0, 0, 0, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
   }
 
-  .premium-logo:hover {
-    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.15))
-            drop-shadow(0 0 35px rgba(59, 130, 246, 0.4));
+  .luxury-button:hover {
+    background: linear-gradient(to bottom, #A52A2A 0%, #8B0000 100%);
+    border-color: #D4AF37;
+    box-shadow:
+      0 0 15px rgba(212, 175, 55, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    color: #FFD700;
+  }
+
+  /* Game Tiles for Luxury Theme */
+  .luxury-tile {
+    @apply relative cursor-pointer border-2 border-luxury-red/30 rounded-lg overflow-hidden;
+    background: linear-gradient(135deg, #1A1A1A 0%, #0A0A0A 100%);
+    transition: all 0.3s ease;
+  }
+
+  .luxury-tile:hover {
+    border-color: #D4AF37;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
     transform: scale(1.05);
   }
 
-  .metallic-text {
-    background: linear-gradient(135deg, #3B82F6 0%, #D946EF 50%, #FACC15 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  .luxury-tile.revealed {
+    border-color: #A52A2A;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
   }
 
-  .circuit-pattern {
-    position: relative;
+  /* Animations */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% center;
+    }
+
+    100% {
+      background-position: 200% center;
+    }
   }
 
-  .circuit-pattern::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      radial-gradient(circle at 25% 25%, rgba(59, 130, 246, 0.05) 0%, transparent 25%),
-      radial-gradient(circle at 75% 75%, rgba(217, 70, 239, 0.03) 0%, transparent 25%);
-    pointer-events: none;
-    border-radius: inherit;
+  .animate-shimmer {
+    background: linear-gradient(90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 3s infinite linear;
   }
 }

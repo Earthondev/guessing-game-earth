@@ -25,45 +25,45 @@ const MultiAnswerInput = ({ answers, onChange, label = "คำตอบที่
     onChange(answers.filter((_, i) => i !== index));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addAnswer();
-    }
-  };
+
 
   return (
     <div className="space-y-3">
-      <label className="text-black font-medium">{label}</label>
-      
+      <label className="text-gray-300 font-medium">{label}</label>
+
       <div className="flex gap-2">
         <Input
           value={newAnswer}
-          onChange={(e) => setNewAnswer(e.target.value)}
-          onKeyPress={handleKeyPress}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewAnswer(e.target.value)}
+          onKeyPress={(e: React.KeyboardEvent<HTMLInputElement>) => {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              addAnswer();
+            }
+          }}
           placeholder="เพิ่มคำตอบ..."
-          className="bg-white border-gray-300 text-black"
+          className="bg-rich-black-lighter border-gold/20 text-white focus:border-gold/50 placeholder:text-gray-500"
         />
         <Button
           type="button"
           onClick={addAnswer}
           disabled={!newAnswer.trim()}
-          className="bg-blue-500 hover:bg-blue-600 text-white"
+          className="bg-luxury-red hover:bg-luxury-red/80 text-white border border-luxury-red/50"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-5 h-5" />
         </Button>
       </div>
 
       <div className="flex flex-wrap gap-2">
         {answers.map((answer, index) => (
-          <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-gray-200 text-black">
+          <Badge key={index} variant="secondary" className="flex items-center gap-1 bg-gold/10 text-gold border border-gold/20 px-3 py-1">
             {answer}
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => removeAnswer(index)}
-              className="h-4 w-4 p-0 hover:bg-red-100"
+              className="h-4 w-4 p-0 hover:bg-red-500/20 text-red-400 hover:text-red-300 ml-1 rounded-full transition-colors"
             >
               <X className="w-3 h-3" />
             </Button>
