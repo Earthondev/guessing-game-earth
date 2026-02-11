@@ -1,49 +1,146 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Shuffle, Home } from "lucide-react";
+import { Shuffle, Home, Trophy, Send, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { useLeaderboard } from "@/hooks/useLeaderboard";
 
 interface GameCompletedProps {
   totalScore: number;
   onResetGame: () => void;
   totalQuestions?: number;
+  category?: string;
 }
 
-const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10 }: GameCompletedProps) => {
+const PLAYER_NAME_KEY = "guessing_game_player_name";
+
+const GameCompleted = ({ totalScore, onResetGame, totalQuestions = 10, category = "" }: GameCompletedProps) => {
   const maxScore = totalQuestions * 25;
-  
+  const percentage = (totalScore / maxScore) * 100;
+  const [playerName, setPlayerName] = useState(() => localStorage.getItem(PLAYER_NAME_KEY) || "");
+  const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const { submitScore } = useLeaderboard();
+
   const getScoreMessage = (score: number) => {
-    const percentage = (score / maxScore) * 100;
     if (percentage >= 80) return "🌟 ยอดเยี่ยม! คุณรู้จักหมวดหมู่นี้ดีมาก!";
     if (percentage >= 60) return "👍 ดีมาก! คุณมีความรู้ในระดับดี";
     if (percentage >= 40) return "😊 พอใช้! ลองเล่นอีกครั้งเพื่อพัฒนา";
     return "💪 ลองใหม่อีกครั้ง! ฝึกฝนแล้วจะเก่งขึ้น";
   };
 
+  const getScoreEmoji = () => {
+    if (percentage >= 80) return "🏆";
+    if (percentage >= 60) return "🥈";
+    if (percentage >= 40) return "🥉";
+    return "🎮";
+  };
+
+  const handleSubmitScore = async () => {
+    if (!playerName.trim() || submitting) return;
+    setSubmitting(true);
+    localStorage.setItem(PLAYER_NAME_KEY, playerName.trim());
+    const success = await submitScore(playerName.trim(), totalScore, category, totalQuestions);
+    if (success) {
+      setSubmitted(true);
+    }
+    setSubmitting(false);
+  };
+
   const handleResetClick = () => {
-    console.log('Reset button clicked');
     onResetGame();
   };
 
   return (
-    <Card className="bg-gray-900 border-green-500 border-2 mb-6">
-      <CardContent className="p-8 text-center">
-        <h2 className="text-2xl font-bold text-green-400 mb-4">🏁 เกมจบแล้ว!</h2>
-        <p className="text-xl text-white mb-4">คะแนนรวม: {totalScore} / {maxScore} คะแนน</p>
-        <p className="text-gray-300 mb-6">{getScoreMessage(totalScore)}</p>
-        <div className="flex gap-4 justify-center">
+    <Card className="border-2 mb-6 bg-[#0d0d0d] border-gold/30 shadow-[0_0_30px_rgba(212,175,55,0.15)]">
+      <CardContent className="p-8">
+        {/* Score Display */}
+        <div className="text-center mb-6">
+          <div className="text-5xl mb-3">{getScoreEmoji()}</div>
+          <h2 className="text-2xl font-heading font-bold text-gold mb-2">เกมจบแล้ว!</h2>
+          <div className="inline-flex items-baseline gap-1 mb-2">
+            <span className="text-4xl font-bold text-white tabular-nums">{totalScore}</span>
+            <span className="text-lg text-gray-500">/ {maxScore}</span>
+          </div>
+
+          {/* Score bar */}
+          <div className="w-full max-w-xs mx-auto h-2 bg-white/5 rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full rounded-full transition-all duration-1000 ease-out"
+              style={{
+                width: `${percentage}%`,
+                background: percentage >= 80
+                  ? "linear-gradient(90deg, #facc15, #f59e0b)"
+                  : percentage >= 60
+                    ? "linear-gradient(90deg, #22d3ee, #3b82f6)"
+                    : percentage >= 40
+                      ? "linear-gradient(90deg, #f97316, #ef4444)"
+                      : "linear-gradient(90deg, #6b7280, #9ca3af)",
+              }}
+            />
+          </div>
+          <p className="text-gray-400 text-sm">{getScoreMessage(totalScore)}</p>
+        </div>
+
+        {/* Submit Score Section */}
+        {!submitted ? (
+          <div className="bg-white/[0.03] border border-white/10 rounded-xl p-5 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <Trophy className="w-4 h-4 text-gold" />
+              <p className="text-sm font-medium text-white">บันทึกคะแนนลง Leaderboard</p>
+            </div>
+            <div className="flex gap-2">
+              <Input
+                placeholder="ชื่อของคุณ..."
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSubmitScore()}
+                maxLength={20}
+                className="bg-rich-black-lighter border-gold/20 text-white placeholder:text-gray-500 focus:border-gold/50"
+              />
+              <Button
+                onClick={handleSubmitScore}
+                disabled={!playerName.trim() || submitting}
+                className="luxury-button shrink-0 px-5"
+              >
+                {submitting ? (
+                  <div className="w-4 h-4 border-2 border-white/50 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-1.5" />
+                    บันทึก
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4 mb-6 text-center">
+            <div className="flex items-center justify-center gap-2 text-green-400">
+              <Check className="w-5 h-5" />
+              <p className="font-medium">บันทึกคะแนนเรียบร้อย!</p>
+            </div>
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 justify-center">
           <Button
             onClick={handleResetClick}
-            className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3"
+            className="luxury-button px-6 py-3"
           >
             <Shuffle className="w-4 h-4 mr-2" />
-            เล่นใหม่ (สุ่มอีกรอบ)
+            เล่นใหม่
           </Button>
           <Link to="/">
-            <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white px-6 py-3">
+            <Button
+              variant="outline"
+              className="border-gold/30 text-gold hover:bg-gold/10 px-6 py-3"
+            >
               <Home className="w-4 h-4 mr-2" />
-              กลับหน้าหลัก
+              หน้าหลัก
             </Button>
           </Link>
         </div>

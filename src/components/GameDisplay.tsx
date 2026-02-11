@@ -18,11 +18,11 @@ interface GameDisplayProps {
   onResetGame?: () => void;
 }
 
-const GameDisplay = ({ 
-  currentImage, 
-  showOriginal, 
-  allRevealed, 
-  revealedTiles, 
+const GameDisplay = ({
+  currentImage,
+  showOriginal,
+  allRevealed,
+  revealedTiles,
   onTileClick,
   onNextQuestion,
   canGoNext,
@@ -59,22 +59,13 @@ const GameDisplay = ({
                 ข้อถัดไป
               </Button>
             )}
-            {isLastQuestion && (
-              <div className="flex gap-4 justify-center">
-                <Button
-                  onClick={onResetGame}
-                  className="bg-red-600 hover:bg-red-700 text-white font-bold"
-                >
-                  <Shuffle className="w-4 h-4 mr-2" />
-                  เริ่มใหม่
-                </Button>
-                <Link to="/">
-                  <Button variant="outline" className="border-gray-600 text-gray-300 hover:bg-gray-800 hover:text-white">
-                    <Home className="w-4 h-4 mr-2" />
-                    ออกเกม
-                  </Button>
-                </Link>
-              </div>
+            {isLastQuestion && onNextQuestion && (
+              <Button
+                onClick={onNextQuestion}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold"
+              >
+                🏁 จบเกม — ดูคะแนนรวม
+              </Button>
             )}
           </div>
         </CardContent>

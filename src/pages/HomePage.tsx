@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Settings, Shield, HelpCircle, Youtube } from "lucide-react";
+import { Settings, Shield, HelpCircle, Youtube, Trophy } from "lucide-react";
+import Leaderboard from "@/components/Leaderboard";
 import CategorySelector, { GameCategory } from "@/components/CategorySelector";
 import AuthModal from "@/components/AuthModal";
 import HowToPlayModal from "@/components/HowToPlayModal";
@@ -142,8 +143,8 @@ const HomePage = () => {
         </div>
       </header>
 
-      {/* Main Game Content — centered vertically */}
-      <main className="flex-1 flex items-center justify-center">
+      {/* Main Game Content */}
+      <main className="flex-1">
         <div className="container mx-auto px-4 py-8 max-w-5xl">
           {/* Minimal Hero */}
           <div className="text-center mb-10">
@@ -170,6 +171,17 @@ const HomePage = () => {
             onStartGame={() => { }}
             loading={loading}
           />
+
+          {/* Leaderboard */}
+          <div className="mt-12 max-w-lg mx-auto">
+            <div className="flex items-center gap-2 mb-4">
+              <Trophy className="w-5 h-5 text-gold" />
+              <h3 className="text-lg font-heading font-bold text-gold">อันดับคะแนนสูงสุด</h3>
+            </div>
+            <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-5">
+              <Leaderboard />
+            </div>
+          </div>
         </div>
       </main>
 

@@ -17,7 +17,7 @@ interface HowToPlayModalProps {
 const HowToPlayModal = ({ isOpen, onClose }: HowToPlayModalProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md luxury-card border-gold/20 backdrop-blur-lg">
+      <DialogContent className="sm:max-w-md border border-gold/20 backdrop-blur-lg bg-[#1a0505] shadow-[0_10px_30px_rgba(0,0,0,0.5),0_0_20px_rgba(139,0,0,0.2)]">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-center flex items-center justify-center gap-2 text-gold">
             <Gamepad2 className="w-7 h-7" />

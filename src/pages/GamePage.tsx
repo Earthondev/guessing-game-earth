@@ -114,6 +114,7 @@ const GamePage = () => {
             totalScore={gameState.totalScore}
             onResetGame={resetGame}
             totalQuestions={10}
+            category={category}
           />
         )}
 
