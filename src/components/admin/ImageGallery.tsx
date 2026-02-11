@@ -129,6 +129,10 @@ const ImageGallery = ({ images, categories, selectedCategoryView, loading, onIma
                             src={image.imageUrl}
                             alt={`${image.answer} - เล่นเกม`}
                             className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                            onError={(e) => {
+                              e.currentTarget.src = "https://placehold.co/400x400?text=Error+Loading";
+                              e.currentTarget.className = "w-full h-full object-cover opacity-50";
+                            }}
                           />
                         </div>
                       </div>
@@ -142,6 +146,10 @@ const ImageGallery = ({ images, categories, selectedCategoryView, loading, onIma
                               src={image.originalImageUrl}
                               alt={`${image.answer} - เฉลย`}
                               className="w-full h-full object-contain hover:scale-105 transition-transform duration-500"
+                              onError={(e) => {
+                                e.currentTarget.src = "https://placehold.co/400x400?text=Error+Loading";
+                                e.currentTarget.className = "w-full h-full object-contain opacity-50";
+                              }}
                             />
                           </div>
                         </div>
