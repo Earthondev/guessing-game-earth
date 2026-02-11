@@ -53,6 +53,14 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
   const handleGameImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size === 0) {
+        toast({
+          title: "ไฟล์มีปัญหา",
+          description: "ไฟล์มีขนาด 0 bytes กรุณาเลือกไฟล์อื่น",
+          variant: "destructive",
+        });
+        return;
+      }
       setNewGameImageFile(file);
       const url = URL.createObjectURL(file);
       setGameImagePreview(url);
@@ -62,6 +70,14 @@ const EditImageModal = ({ image, isOpen, onClose, onUpdate, categories }: EditIm
   const handleAnswerImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size === 0) {
+        toast({
+          title: "ไฟล์มีปัญหา",
+          description: "ไฟล์มีขนาด 0 bytes กรุณาเลือกไฟล์อื่น",
+          variant: "destructive",
+        });
+        return;
+      }
       setNewAnswerImageFile(file);
       const url = URL.createObjectURL(file);
       setAnswerImagePreview(url);

@@ -29,6 +29,15 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
   const handleGameImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("Selected game image:", file.name, "Size:", file.size, "Type:", file.type);
+      if (file.size === 0) {
+        toast({
+          title: "ไฟล์มีปัญหา",
+          description: "ไฟล์มีขนาด 0 bytes กรุณาเลือกไฟล์อื่น",
+          variant: "destructive",
+        });
+        return;
+      }
       if (!file.type.startsWith('image/')) {
         toast({
           title: "ไฟล์ไม่ถูกต้อง",
@@ -47,6 +56,15 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
   const handleAnswerImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      console.log("Selected answer image:", file.name, "Size:", file.size, "Type:", file.type);
+      if (file.size === 0) {
+        toast({
+          title: "ไฟล์มีปัญหา",
+          description: "ไฟล์มีขนาด 0 bytes กรุณาเลือกไฟล์อื่น",
+          variant: "destructive",
+        });
+        return;
+      }
       if (!file.type.startsWith('image/')) {
         toast({
           title: "ไฟล์ไม่ถูกต้อง",
