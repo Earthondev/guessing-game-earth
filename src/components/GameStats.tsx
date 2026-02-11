@@ -1,37 +1,28 @@
-
-import { Card, CardContent } from "@/components/ui/card";
-
 interface GameStatsProps {
-  revealedCount: number;
-  score: number;
-  totalScore: number;
+    revealedCount: number;
+    score: number;
+    totalScore: number;
 }
 
 const GameStats = ({ revealedCount, score, totalScore }: GameStatsProps) => {
-  return (
-    <Card className="bg-gray-900 border-red-500 border-2 mt-8">
-      <CardContent className="p-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-          <div className="transform hover:scale-105 transition-transform bg-gray-800 p-4 rounded-lg border border-gray-600">
-            <div className="text-2xl font-bold text-red-400">{revealedCount}</div>
-            <div className="text-sm text-gray-400">ช่องที่เปิด</div>
-          </div>
-          <div className="transform hover:scale-105 transition-transform bg-gray-800 p-4 rounded-lg border border-gray-600">
-            <div className="text-2xl font-bold text-green-400">{25 - revealedCount}</div>
-            <div className="text-sm text-gray-400">ช่องที่เหลือ</div>
-          </div>
-          <div className="transform hover:scale-105 transition-transform bg-gray-800 p-4 rounded-lg border border-gray-600">
-            <div className="text-2xl font-bold text-orange-400">{score}</div>
-            <div className="text-sm text-gray-400">คะแนนคำถามนี้</div>
-          </div>
-          <div className="transform hover:scale-105 transition-transform bg-gray-800 p-4 rounded-lg border border-gray-600">
-            <div className="text-2xl font-bold text-yellow-400">{totalScore}</div>
-            <div className="text-sm text-gray-400">คะแนนรวม</div>
-          </div>
+    // This is less important if Header already shows it, but we can make a mobile-friendly 
+    // bottom bar or just a duplicate display for convenience if the user scrolls down
+    return (
+        <div className="grid grid-cols-3 gap-2 mt-12 p-4 bg-black/20 rounded-xl border border-white/5 backdrop-blur-sm text-center">
+            <div className="p-2">
+                <div className="text-gray-500 text-xs uppercase tracking-wider mb-1">เปิดแล้ว</div>
+                <div className="text-lg font-bold text-gray-300">{revealedCount} <span className="text-sm font-normal text-gray-600">/ 25</span></div>
+            </div>
+            <div className="p-2 border-l border-white/5">
+                <div className="text-gray-500 text-xs uppercase tracking-wider mb-1">ข้อนี้</div>
+                <div className="text-lg font-bold text-primary">{score}</div>
+            </div>
+            <div className="p-2 border-l border-white/5">
+                <div className="text-gray-500 text-xs uppercase tracking-wider mb-1">รวม</div>
+                <div className="text-lg font-bold text-amber-500">{totalScore}</div>
+            </div>
         </div>
-      </CardContent>
-    </Card>
-  );
+    );
 };
 
 export default GameStats;

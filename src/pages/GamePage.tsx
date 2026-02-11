@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useGameState } from "@/hooks/useGameState";
 import { useGameSounds } from "@/hooks/useGameSounds";
 import { useConfetti } from "@/hooks/useConfetti";
+import { getSeasonalTheme } from "@/utils/themeUtils";
 import GameHeader from "@/components/GameHeader";
 import GameInfo from "@/components/GameInfo";
 import GameCompleted from "@/components/GameCompleted";
@@ -20,7 +21,9 @@ const GamePage = () => {
   const category = searchParams.get('category');
 
   const { playFlip, playCorrect, playWrong, playWin, playTick } = useGameSounds();
-  const { fireConfetti, fireFireworks } = useConfetti();
+  const theme = getSeasonalTheme();
+  // Pass theme-specific colors to confetti
+  const { fireConfetti, fireFireworks } = useConfetti(theme.elements.confettiColors);
 
   useEffect(() => {
     if (!category) {

@@ -53,10 +53,10 @@
   /* Luxury Red Theme Base */
   body {
     @apply bg-rich-black text-white font-sans;
-    background:
-      radial-gradient(circle at 15% 50%, rgba(139, 0, 0, 0.4) 0%, transparent 50%),
-      radial-gradient(circle at 85% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
-      linear-gradient(to bottom, #0A0A0A 0%, #1A1110 100%);
+    background: var(--background-gradient,
+        radial-gradient(circle at 15% 50%, rgba(139, 0, 0, 0.4) 0%, transparent 50%),
+        radial-gradient(circle at 85% 30%, rgba(212, 175, 55, 0.15) 0%, transparent 50%),
+        linear-gradient(to bottom, #0A0A0A 0%, #1A1110 100%));
     min-height: 100vh;
     position: relative;
     overflow-x: hidden;
@@ -69,11 +69,41 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-image:
-      url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background-image: var(--bg-pattern, url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"));
     pointer-events: none;
     z-index: 0;
   }
+}
+
+/* Seasonal Theme Classes */
+.theme-halloween {
+  --primary: 255 117 24;
+  --accent: 114 176 67;
+  --background-gradient: radial-gradient(circle at 20% 20%, rgba(255, 117, 24, 0.3) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(46, 8, 84, 0.4) 0%, transparent 50%),
+    linear-gradient(to bottom, #000000 0%, #2E0854 100%);
+  --bg-pattern: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='2' fill='%23FF7518' fill-opacity='0.2'/%3E%3C/svg%3E");
+}
+
+.theme-christmas {
+  --primary: 212 36 38;
+  --accent: 248 178 41;
+  --background-gradient: radial-gradient(circle at 50% 0%, rgba(212, 36, 38, 0.3) 0%, transparent 60%),
+    linear-gradient(to bottom, #165B33 0%, #0F3A22 100%);
+}
+
+.theme-songkran {
+  --primary: 0 191 255;
+  --accent: 255 255 0;
+  --background-gradient: radial-gradient(circle at 50% 50%, rgba(0, 191, 255, 0.2) 0%, transparent 70%),
+    linear-gradient(to bottom, #E0FFFF 0%, #87CEEB 100%);
+}
+
+.theme-valentines {
+  --primary: 255 20 147;
+  --accent: 255 255 255;
+  --background-gradient: radial-gradient(circle at 30% 30%, rgba(255, 192, 203, 0.4) 0%, transparent 50%),
+    linear-gradient(to bottom, #FFC0CB 0%, #FF69B4 100%);
 }
 
 @layer components {
@@ -206,4 +236,57 @@
   box-shadow: none !important;
   border: none !important;
   z-index: 1;
+}
+
+/* 3D Flip Animation */
+.flip-card {
+  perspective: 1000px;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  cursor: pointer;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.flip-card-front {
+  background: linear-gradient(135deg, #1A1A1A 0%, #0A0A0A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid rgba(139, 0, 0, 0.3);
+}
+
+.flip-card:hover .flip-card-front {
+  border-color: #D4AF37;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+}
+
+.flip-card-back {
+  background-color: transparent;
+  transform: rotateY(180deg);
+  background-size: 500% 500%;
+  /* Default for grid usage */
 }

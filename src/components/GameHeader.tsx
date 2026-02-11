@@ -1,82 +1,67 @@
-import { Link } from "react-router-dom";
-import { Home } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import GameTimer from "@/components/GameTimer";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Clock } from "lucide-react";
 
 interface GameHeaderProps {
-  categoryDisplayName: string;
-  currentImageIndex: number;
-  totalScore: number;
-  score: number;
-  gameCompleted: boolean;
-  revealedCount: number;
-  totalQuestions?: number;
-  onTimeUp?: () => void;
-  onTick?: () => void;
-  isTimerActive?: boolean;
+    categoryDisplayName: string;
+    currentImageIndex: number;
+    totalScore: number;
+    score: number;
+    gameCompleted: boolean;
+    revealedCount: number;
+    totalQuestions: number;
+    onTimeUp?: () => void;
+    onTick?: () => void;
+    isTimerActive?: boolean;
 }
 
 const GameHeader = ({
-  categoryDisplayName,
-  currentImageIndex,
-  totalScore,
-  score,
-  gameCompleted,
-  revealedCount,
-  totalQuestions = 10,
-  onTimeUp,
-  onTick,
-  isTimerActive = true
+    categoryDisplayName,
+    currentImageIndex,
+    totalScore,
+    score,
+    revealedCount,
+    totalQuestions,
 }: GameHeaderProps) => {
-  return (
-    <div className="flex items-center justify-between mb-8">
-      <div className="flex items-center gap-4">
-        <Link to="/">
-          <Button variant="outline" size="icon" className="hover:scale-105 transition-transform border-red-500 text-red-500 hover:bg-red-500 hover:text-white">
-            <Home className="w-4 h-4" />
-          </Button>
-        </Link>
-        <div className="animate-fade-in">
-          <a
-            href="https://www.youtube.com/@OurUsualday"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="block hover:scale-110 transition-transform duration-300"
-          >
-            <h1 className="text-4xl font-bold text-red-500 hover:text-red-400 cursor-pointer bg-gradient-to-r from-red-500 via-red-600 to-red-700 bg-clip-text text-transparent">
-              🎮 GUESS GAME
-            </h1>
-          </a>
-          <h2 className="text-2xl font-bold text-white mt-2">
-            {categoryDisplayName}
-          </h2>
-          <p className="text-sm text-gray-400">
-            {gameCompleted ? 'เกมจบแล้ว' : `คำถามที่ ${currentImageIndex + 1}/${totalQuestions}`} | คะแนนรวม: {totalScore + (gameCompleted ? 0 : score)}
-          </p>
-        </div>
-      </div>
+    return (
+        <div className="flex flex-col gap-4 mb-6">
+            <div className="flex justify-between items-center bg-gray-900/50 p-4 rounded-xl border border-gray-800 backdrop-blur-sm shadow-lg">
+                <div className="flex items-center gap-4">
+                    <Badge variant="outline" className="text-lg px-4 py-1 border-primary/50 text-emerald-400 bg-emerald-950/30">
+                        {categoryDisplayName}
+                    </Badge>
+                    <div className="flex items-center gap-2 text-gray-400 font-medium bg-gray-800/50 px-3 py-1 rounded-md">
+                        <span>ข้อที่</span>
+                        <span className="text-white text-xl">{currentImageIndex + 1}</span>
+                        <span className="text-sm">/ {totalQuestions}</span>
+                    </div>
+                </div>
 
-      <div className="flex items-center gap-4">
-        {!gameCompleted && (
-          <div className="bg-gray-800 px-3 py-2 rounded-lg border border-gray-600">
-            <GameTimer
-              key={currentImageIndex} // Reset timer on new question
-              isActive={isTimerActive}
-              onTimeUp={onTimeUp}
-              onTick={onTick}
-              duration={60}
-            />
-          </div>
-        )}
-        <div className="text-sm text-gray-300 bg-gray-800 px-3 py-2 rounded-lg border border-gray-600">
-          คะแนนคำถามนี้: <span className="text-red-400 font-bold">{score}</span>
+                <div className="flex items-center gap-4 md:gap-8">
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider font-semibold">คะแนนรวม</span>
+                        <span className="text-xl md:text-3xl font-black text-amber-500 drop-shadow-sm">{totalScore}</span>
+                    </div>
+                    <div className="h-10 w-px bg-gray-700/50"></div>
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] md:text-xs text-gray-400 uppercase tracking-wider font-semibold">คะแนนข้อนี้</span>
+                        <span className="text-xl md:text-3xl font-black text-primary drop-shadow-sm">{score}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="relative pt-2 px-1">
+                <div className="flex justify-between text-xs font-mono text-gray-400 mb-2">
+                    <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        <span>เปิดแล้ว {revealedCount}/25</span>
+                    </div>
+                    <span>{Math.round((revealedCount / 25) * 100)}%</span>
+                </div>
+                <Progress value={(revealedCount / 25) * 100} className="h-2 bg-gray-800" />
+            </div>
         </div>
-        <div className="text-sm text-gray-300 bg-gray-800 px-3 py-2 rounded-lg border border-gray-600">
-          เปิดแล้ว <span className="text-red-400 font-bold">{revealedCount}</span>/25 ช่อง
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default GameHeader;
