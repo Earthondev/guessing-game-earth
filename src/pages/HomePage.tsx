@@ -103,7 +103,7 @@ const HomePage = () => {
             </a>
             
             <h1 className="text-4xl md:text-7xl font-heading font-bold text-foreground mb-4 drop-shadow-lg">
-              TILE PUZZLE PLATFORM
+              PICTURE GUESSING GAME
             </h1>
           </div>
           

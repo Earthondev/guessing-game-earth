@@ -1,4 +1,7 @@
-# Welcome to your Lovable project
+# Picture Guessing Game
+
+A fun and interactive picture guessing game built with React, Vite, and Tailwind CSS.
+
 
 ## Project info
 

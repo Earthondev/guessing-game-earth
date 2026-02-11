@@ -33,7 +33,7 @@ const AdminPage = () => {
 const AdminPageContent = () => {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("masked_rider");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategoryView, setSelectedCategoryView] = useState<string>("");
 
@@ -56,7 +56,7 @@ const AdminPageContent = () => {
 
       if (error) throw error;
       setCategories(data || []);
-      
+
       // Set default category if categories exist
       if (data && data.length > 0 && !selectedCategory) {
         setSelectedCategory(data[0].name);
@@ -94,7 +94,7 @@ const AdminPageContent = () => {
           // Properly parse accepted_answers and ensure it's string[]
           let acceptedAnswersList: string[] = [img.answer];
           if (img.accepted_answers && Array.isArray(img.accepted_answers)) {
-            acceptedAnswersList = img.accepted_answers.filter((answer: any): answer is string => 
+            acceptedAnswersList = img.accepted_answers.filter((answer: any): answer is string =>
               typeof answer === 'string'
             );
           }

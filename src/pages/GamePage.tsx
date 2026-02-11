@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { useGameState } from "@/hooks/useGameState";
 import GameHeader from "@/components/GameHeader";
@@ -14,10 +14,19 @@ import YouTubeFloatingButton from "@/components/YouTubeFloatingButton";
 
 const GamePage = () => {
   const [searchParams] = useSearchParams();
-  const category = searchParams.get('category') || 'masked_rider';
+  const navigate = useNavigate();
+  const category = searchParams.get('category');
+
+  useEffect(() => {
+    if (!category) {
+      navigate('/');
+    }
+  }, [category, navigate]);
+
+  if (!category) return null;
   const [showYouTubeModal, setShowYouTubeModal] = useState(false);
   const [hasShownModal, setHasShownModal] = useState(false);
-  
+
   const {
     gameState,
     loadImages,
@@ -39,7 +48,7 @@ const GamePage = () => {
         setShowYouTubeModal(true);
         setHasShownModal(true);
       }, 2000); // Show modal 2 seconds after game completion
-      
+
       return () => clearTimeout(timer);
     }
   }, [gameState.gameCompleted, hasShownModal]);
@@ -54,9 +63,9 @@ const GamePage = () => {
         <Card className="bg-gray-900 border-red-500 border-2">
           <CardContent className="p-12 text-center">
             <div className="mb-6">
-              <img 
-                src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png" 
-                alt="Loading..." 
+              <img
+                src="/lovable-uploads/335da3d0-e2ee-42b1-9641-23af0f38de4a.png"
+                alt="Loading..."
                 className="w-24 h-24 mx-auto animate-bounce"
               />
             </div>
@@ -142,7 +151,7 @@ const GamePage = () => {
       />
 
       {/* Floating YouTube Button */}
-      <YouTubeFloatingButton 
+      <YouTubeFloatingButton
         videoId="jWH_kwAqgc8"
         channelName="Our Usual Day"
       />
