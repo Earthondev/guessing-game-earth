@@ -72,27 +72,68 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
       return;
     }
 
+    // Check file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
+    if (gameImageFile.size > maxSize || answerImageFile.size > maxSize) {
+      toast({
+        title: "ไฟล์ใหญ่เกินไป",
+        description: "ขนาดไฟล์รูปภาพต้องไม่เกิน 10MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const timestamp = Date.now();
-      const gameImageFileName = `game_${timestamp}_${gameImageFile.name}`;
-      const answerImageFileName = `answer_${timestamp}_${answerImageFile.name}`;
+      // Sanitize filename - remove special characters that may cause issues
+      const sanitize = (name: string) => name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const gameImageFileName = `game_${timestamp}_${sanitize(gameImageFile.name)}`;
+      const answerImageFileName = `answer_${timestamp}_${sanitize(answerImageFile.name)}`;
+
+      console.log('Uploading game image:', gameImageFileName, 'size:', gameImageFile.size);
 
       // Upload game image (cropped 1:1 image for playing)
-      const { error: gameUploadError } = await supabase.storage
+      const { error: gameUploadError, data: gameData } = await supabase.storage
         .from('masked-rider-images')
-        .upload(gameImageFileName, gameImageFile);
+        .upload(gameImageFileName, gameImageFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-      if (gameUploadError) throw gameUploadError;
+      if (gameUploadError) {
+        console.error('Game image upload error:', gameUploadError);
+        toast({
+          title: "อัปโหลดรูปเล่นเกมไม่สำเร็จ",
+          description: gameUploadError.message || "ไม่สามารถอัปโหลดรูปเล่นเกมได้",
+          variant: "destructive",
+        });
+        return;
+      }
+      console.log('Game image uploaded successfully:', gameData);
 
       // Upload answer image (full image for reveal)
-      const { error: answerUploadError } = await supabase.storage
+      console.log('Uploading answer image:', answerImageFileName, 'size:', answerImageFile.size);
+      const { error: answerUploadError, data: answerData } = await supabase.storage
         .from('masked-rider-images')
-        .upload(answerImageFileName, answerImageFile);
+        .upload(answerImageFileName, answerImageFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-      if (answerUploadError) throw answerUploadError;
+      if (answerUploadError) {
+        console.error('Answer image upload error:', answerUploadError);
+        toast({
+          title: "อัปโหลดรูปเฉลยไม่สำเร็จ",
+          description: answerUploadError.message || "ไม่สามารถอัปโหลดรูปเฉลยได้",
+          variant: "destructive",
+        });
+        return;
+      }
+      console.log('Answer image uploaded successfully:', answerData);
 
       // Save metadata to database
+      console.log('Saving to database:', { filename: gameImageFile.name, storage_path: gameImageFileName, original_storage_path: answerImageFileName, answer: acceptedAnswers[0], category: selectedCategory });
       const { error: dbError } = await supabase
         .from('masked_rider_images')
         .insert({
@@ -104,7 +145,15 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
           category: selectedCategory
         });
 
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.error('Database insert error:', dbError);
+        toast({
+          title: "บันทึกข้อมูลไม่สำเร็จ",
+          description: dbError.message || "ไม่สามารถบันทึกข้อมูลรูปภาพลงฐานข้อมูลได้",
+          variant: "destructive",
+        });
+        return;
+      }
 
       toast({
         title: "เพิ่มรูปภาพสำเร็จ",
@@ -119,11 +168,12 @@ const ImageUploadForm = ({ categories, selectedCategory, setSelectedCategory, on
       setAcceptedAnswers([]);
       onImageUploaded();
 
-    } catch (error) {
-      console.error('Error uploading image:', error);
+    } catch (error: any) {
+      console.error('Error uploading image (full):', error);
+      const errorMsg = error?.message || error?.error_description || JSON.stringify(error);
       toast({
         title: "เกิดข้อผิดพลาด",
-        description: "ไม่สามารถเพิ่มรูปภาพได้",
+        description: `ไม่สามารถเพิ่มรูปภาพได้: ${errorMsg}`,
         variant: "destructive",
       });
     } finally {
